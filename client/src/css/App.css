@@ -1,0 +1,22 @@
+.App {
+  text-align: center;
+
+}
+
+.myContainer {
+  
+    width: 38vw; 
+    height: 85vh;
+    text-align: center;
+    border: .5em, solid, #d9e1eb;
+    align-self: center;
+    display: inline-block;
+    border-radius: 1.5rem;
+    justify-content: center;
+    background: #b1bec9;
+    margin-top: 1vh;
+    padding-bottom:7vh;
+ 
+}
+
+

@@ -1,0 +1,34 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "description": "- Node.js - Express.js - Socket.io - Redis",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "Mehmet Seven <mehmetseven0@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.17.1",
+    "express-session": "^1.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "lodash": "^4.17.20",
+    "mongoose": "^9.0.2",
+    "redis": "^3.1.2",
+    "shortid": "^2.2.16",
+    "socket.io": "^3.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "directories": {
+    "lib": "lib"
+  }
+}

@@ -1,0 +1,132 @@
+body{
+  background:#666b7b;
+   font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+
+.chatList {
+
+  width:100% ;
+  height: 72.5vh;
+  background-color: inherit;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-behavior: auto;
+}
+
+.chatRoomList {
+
+  width:100% ;
+  height: 80vh;
+  background-color: inherit;
+  overflow-y: scroll;
+  scroll-behavior: auto;
+}
+button{
+    width: 6.5vw;
+    height: 6vh;
+    border: 3px solid, #3a32b5;
+    outline-width: 2px,solid,red;
+    margin-right: 0;
+    border-radius: 1em;
+    margin-left: 30vw;
+    padding: .5em 0;
+
+}
+.timeStamp{
+  color:red;
+}
+.textInput {
+    width: 29vw;
+    display: flow;
+    font-size: 1em;
+    height: 6vh;
+    max-height: 10vh;
+    border: 3px, solid, #3a32b5;
+    border-radius: 1.5em;
+    position: fixed;
+     bottom:6vh;
+}
+
+
+.chatItem {
+  font-size: 1em;
+  color: #fff;
+  border-radius: 0 1em .8em 1.3em;
+  background: #7182cf;
+  padding: .15em 1.2em .6em .7em;
+  border: .15em solid #bbbcdd;
+  box-shadow: 1px 2px 2px #fff;
+  width: fit-content;
+  max-width: 25vw;
+  margin-bottom: .5em;
+  display: flex;
+  flex-direction: column;
+}
+.chatContent {
+  display: inline-flex;      
+  align-items: flex-end;      
+  max-width: 28vw;            
+  word-break: break-word;
+}
+
+.messageText {
+  margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.messageMeta {
+  display: flex;
+  align-items: center;
+  align-self: flex-end;
+
+  white-space: nowrap;
+  margin-left: 1em;
+  padding-top: .8em;
+}
+
+.messageMeta span {
+ color: #1a1919c9;
+  font-size: .85em;
+}
+
+.messageMeta svg {
+  font-size: 1.2em;
+  margin-left: 0.2em;
+  fill: rgb(159 253 243);
+}
+
+.right {
+  margin-right: 1em !important;
+  margin-left: auto;
+ }
+ .left{
+  background-color: rgb(221, 218, 248);
+  color:#0d0855eb;
+   }
+ .alertDiv{
+  text-align:center;
+ }
+.buttonForm{
+  padding:".5em   7.5em",
+}
+#signButton{
+  background-color:#afd3d3ff;
+   color:#06048bff;
+   margin-top:1.6em;
+}
+.customTab {
+  font-weight: bold;
+  color: #5d3c9b;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+ }
+
+ .content_line{
+  max-width: 35ch; /* Limits width to 40 characters of the current font */
+  white-space: nowrap; /* Prevents text from wrapping */
+  overflow: hidden; /* Hides overflowing text */
+  text-overflow: ellipsis; /* Adds dots at the end */
+  margin:0;
+
+ }

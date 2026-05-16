@@ -1,0 +1,115 @@
+
+import { io } from "socket.io-client";
+
+let socket = null;
+
+export const init = (token) => {
+
+    if (socket) {
+
+    if (!socket.connected) {
+      console.log("♻️ reconnecting socket...");
+      socket.connect();
+    }
+
+    return socket;
+  }
+
+  socket = io("http://localhost:3000", {
+    auth: { token },
+  });
+
+  console.log("⚙️ SOCKET INIT");
+
+  socket.on("connect", () => {
+    console.log("✅ Socket Connected:", socket.id);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("❌ Socket disconnected");
+  });
+
+  socket.on("connect_error", (err) => {
+    console.error("❌ Connection failed:", err.message);
+
+    if (
+      err.message.includes("Unauthorized") ||
+      err.message.includes("jwt expired")
+    ) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
+
+      window.dispatchEvent(new Event("forceLogout"));
+    }
+  });
+
+  return socket;
+};
+
+export const getSocket = () => socket;
+
+export const disconnectSocket = () => {
+
+  if (!socket) return;
+
+  socket.disconnect();
+  socket = null;
+
+  console.log("🛑 Socket destroyed");
+};
+
+export const sendMessage = (message, username,room) => { //completed
+
+  console.log("formdan giden message",message)
+   if (!socket) return;
+    socket.emit("newMessage", message, username,room);
+    console.log("📨 sending message");
+};
+
+export const getNewGroupRoom =(callback) =>{  //use UseEffect //socketUpdate
+ if (!socket) return;  
+   
+      socket.on("newGroupRoom", (savedRoom) => {
+      console.log("🔥Backend send new Group:", savedRoom);
+      callback(savedRoom);
+    });
+}
+
+export const publicGroupUpdated = (callback) =>{//completed
+if (!socket) return;
+
+     socket.on("publicGroupUpdated", (room) => {
+      console.log("Updated public room", room);
+      callback(room);
+    });
+
+}
+
+export const privateGroupUpdated = (callback) =>{//completed
+if (!socket) return;
+   
+ socket.on("privateGroupUpdated", (room) => {
+      console.log("Updated private room", room);
+      callback(room); // added callback here
+    });
+
+}
+export const getNewMessage = (callback) => { //completed
+
+if (!socket) return;
+
+    socket.on("dbNewMessage", (data) => {
+      console.log("🔥Backend Gelen Active Room  :", data.room," Message content :",data.message.content);
+        
+          callback(data);
+    });
+};
+
+ export const getDeletedItemList = (callback) =>{
+if (!socket) return;
+
+    socket.on("itemDeleted", (item,type,list) => {
+      console.log("🔥Backend send  deleted type and List:", item,type,list);
+      callback(item,type,list);
+    });
+}

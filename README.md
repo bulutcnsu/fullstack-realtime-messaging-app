@@ -63,7 +63,7 @@ cd YOUR_REPO_NAME
 1. Navigate to the server directory (or root if your server is at root):
    ```bash
    # Adjust according to your project structure
-   cd server 
+   cd BACKEND 
    npm install
    ```
 2. Create a `.env` file in the server directory and configure your environment variables:
@@ -86,6 +86,7 @@ cd YOUR_REPO_NAME
    ```
 2. Start the React development server:
    ```bash
+   cd client
    npm start
    ```
 

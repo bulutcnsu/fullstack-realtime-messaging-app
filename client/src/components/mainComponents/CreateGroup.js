@@ -45,8 +45,7 @@ const [color,setColor]=useState("");
    if (data.success) {      
      setColor("green");   
      setMessage("Group has created succesfully");
-     console.log("bana dönen room",data.newRoom)
-    newRoom(data.newRoom)} 
+      newRoom(data.room)} 
   
     else {
     setColor("red");

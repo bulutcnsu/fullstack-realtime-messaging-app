@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { fetchAllUsers } from "../../api/httpApi";
 import { updatePrivateGroup} from "../../api/httpApi";
 
-const AddUserPage = ({ show, room, updatePrivateGroup }) => {
+const AddUserPage = ({ show, room, updatePrivateGroupList }) => {
   const [checkedItems, setCheckedItems] = useState([]);
   const [entry, setEntry] = useState(null);
   const [users, setUsers] = useState([]);
@@ -62,11 +62,10 @@ const AddUserPage = ({ show, room, updatePrivateGroup }) => {
       }
     });
   };
-  console.log("değişen checked list ", checkedItems);
   const handleSearch = () => {
     if (entry !== null) {
       query = users.filter((user) => user.username.includes(entry.trim()));
-      console.log("querry sonucu", query);
+  
 
       if (query) {
         setUserList(query);
@@ -84,19 +83,29 @@ const AddUserPage = ({ show, room, updatePrivateGroup }) => {
     e.preventDefault();
 
     const newList = checkedItems?.filter((el) => el.checkStatus === true);
-    if (newList.length > 0) {
-    await  updatePrivateGroup(newList, room)
-        .then((room) => {
-          setColor("green");
-          setText("Changes have been saved");
-          updatePrivateGroup(room);
-        })
-        .catch(() => console.log("An error ocured "));
+    console.log("checked newlist", newList)
+   
+if (newList.length > 0) {
+  try {
+    const res = await updatePrivateGroup(newList, room);
+    if (res && res.success) {
+      setColor("green");
+      setText("Changes have been saved");
+
+      updatePrivateGroupList(res.updatedRoom);
+    
     } else {
       setColor("red");
-      setText("Nobody has added");
+    
+      setText(res?.message || "Nobody has added");
+      console.log("Operation failed on backend:", res);
     }
-  };
+  } catch (error) {
+    setColor("red");
+    setText("An unexpected error occurred");
+    console.error("UI Request failed:", error);
+  }
+}}
   return (
     <Dialog open>
       <AppBar sx={{ position: "static", bgcolor: "#8091cce3" }}>

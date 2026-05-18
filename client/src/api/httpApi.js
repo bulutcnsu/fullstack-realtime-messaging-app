@@ -139,23 +139,28 @@ export const deleteItemList = async (itemType,list) =>{
 };
 
 export const updatePrivateGroup = async(list,room) =>{ //update Private Group Room List
-console.log("htttp hgelen list , room",list)
-  try {
-      const res = await fetch("http://localhost:3000/api/room/updatePrivateGroup", {
+ try {
+    const res = await fetch("http://localhost:3000/api/room/updatePrivateGroup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-      list: list ,
-      room : room})
- });
+      body: JSON.stringify({ list: list, room: room })
+    });
 
-      const data = await res.json();
-      console.log("Adding Operation is succesfull", data.success,data.updatedRoom)
-      return  data.updatedRoom ;
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({})); 
+      return { 
+        success: false, 
+        message: errorData.message || `Server error: ${res.status}` 
+      };
+    }
+
+    const data = await res.json();
+    console.log("Adding Operation is successful", data.success, data.updatedRoom);
+    return data;
 
   } catch (err) {
-    console.log("An error ocuured add users", err);
-    return err;
+    console.error("An error occurred adding users:", err);
+    return { success: false, message: err.message || "Network error" };
   }
 
 }

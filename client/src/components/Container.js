@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { init, disconnectSocket, getNewMessage, getDeletedItemList } from "../api/socketApi";
+import { init, disconnectSocket, getNewMessage, getDeletedItemList, privateGroupUpdated } from "../api/socketApi";
 import { loadMessages, loadRooms } from "../api/httpApi";
 import { useChat } from "../context/ChatContext";
 import { getSocket, authEvents } from "../api/socketApi";
@@ -28,79 +28,98 @@ function Container() {
     selectedRoomRef.current = selectedRoom;
   }, [selectedRoom]);
 
-useEffect(() => {
- 
-  if (!token) {
-    setIsAuth(false);
-    return;
-  }
-  const socket = init(token);
+  useEffect(() => {
 
-  const handleConnect = () => {
-    setIsAuth(true);
-  };
+    if (!token) {
+      setIsAuth(false);
+      return;
+    }
+    const socket = init(token);
 
-  if (socket) {
-     socket.on("connect", handleConnect);
-  }
+    const handleConnect = () => {
+      setIsAuth(true);
+    };
 
-  return () => {
     if (socket) {
-      socket.off("connect", handleConnect);
+      socket.on("connect", handleConnect);
     }
-    disconnectSocket();
-  };
-}, [token]);
+
+    return () => {
+      if (socket) {
+        socket.off("connect", handleConnect);
+      }
+      disconnectSocket();
+    };
+  }, [token]);
 
 
-useEffect(() => {
-  if (!isAuth) return;
+  useEffect(() => {
+    if (!isAuth) return;
 
-  loadRooms(username, setRooms);
-  loadMessages(username, setMessages);
+    loadRooms(username, setRooms);
+    loadMessages(username, setMessages);
 
-}, [isAuth]);
+  }, [isAuth]);
 
 
 
-useEffect(() => {
-  if (!isAuth) return;
+  useEffect(() => {
+    if (!isAuth) return;
 
-  const socket = getSocket();
-  if (!socket) return;
+    const socket = getSocket();
+    if (!socket) return;
 
-  const handleNewMessage = (data) => {
-    setRooms(prev =>
-      handleUpdatedRooms(prev, data, selectedRoomRef.current)
-    );
-
-    setMessages(prev =>
-      handleUpdatedMessages(prev, data)
-    );
-  };
-
-  const handleDeletedItem = (item, type, list) => {
-    if (item === "room") {
+    const handleNewMessage = (data) => {
       setRooms(prev =>
-        handleDeleteRoomList(prev, type, list)
+        handleUpdatedRooms(prev, data, selectedRoomRef.current)
       );
+
+      setMessages(prev =>
+        handleUpdatedMessages(prev, data)
+      );
+    };
+
+    const handleDeletedItem = (item, type, list) => {
+      if (item === "room") {
+        setRooms(prev =>
+          handleDeleteRoomList(prev, type, list)
+        );
+      }
+
+      setMessages(prev =>
+        handleDeleteMessageList(prev, type, list)
+      );
+    };
+
+    const handlePrivateGroupUpdate = (room) => {
+      console.log("socketten gelen yakalanan yeni private room:", room);
+      setRooms(prev => {
+
+         handleUpdatedRooms(prev, room, selectedRoomRef.current)
+    /*    const updated = { public: [...prev.public], private: [...prev.private] };
+        const arr = updated[room.type];
+        let newArr = [room, ...arr];
+        console.log(" Container updated rooms  ", { ...updated, [room.type]: newArr });
+        return { ...updated, [room.type]: newArr }*/
+      });
     }
 
-    setMessages(prev =>
-      handleDeleteMessageList(prev, type, list)
-    );
-  };
 
-  socket.on("dbNewMessage", handleNewMessage);
-  socket.on("itemDeleted", handleDeletedItem);
 
-  return () => {
-    socket.off("dbNewMessage", handleNewMessage);
-    socket.off("itemDeleted", handleDeletedItem);
-  };
 
-}, [isAuth]);
- 
+    socket.on("dbNewMessage", handleNewMessage);
+    socket.on("itemDeleted", handleDeletedItem);
+    socket.on("privateGroupUpdated", handlePrivateGroupUpdate)
+
+
+    return () => {
+      socket.off("dbNewMessage", handleNewMessage);
+      socket.off("itemDeleted", handleDeletedItem);
+      socket.off("privateGroupUpdated");
+    };
+
+  }, [isAuth]);
+
 
   console.log("isAuth baslangıc degeri:", isAuth);
   console.log("current selected room is : ", selectedRoom);
@@ -137,17 +156,22 @@ useEffect(() => {
         />
       )}
     </div>
-  );}
+  );
+}
 
 export const handleUpdatedRooms = (prev, data, current) => { //change //updateRoomtemp 
   //sortingRooms
-
-  const tempRoomId = data.tempRoomId; //searchin room is in the state
-  const room = data.room;
   const updated = { public: [...prev.public], private: [...prev.private] };
-  const isEqual = room._id === tempRoomId ? true : false;
+  
 
-  const arr = updated[room.type];
+  const room = data?._id ? data : data?.room; // data has id then data is a room
+  const tempRoomId = data?.tempRoomId; 
+  const arr = updated[room.type] || [];
+
+ if (!room) return prev;
+  
+  const isEqual =  tempRoomId && room._id === tempRoomId; //if there is tempRoomId go to else 
+
 
   if (isEqual) { // dbRoom is exist in state ,just order rooms
 
@@ -158,7 +182,7 @@ export const handleUpdatedRooms = (prev, data, current) => { //change //updateRo
     console.log("updated rooms ", { ...updated, [room.type]: newArr }); // just order state
     return { ...updated, [room.type]: newArr };
   }
-  else if (current._id === tempRoomId) { //is there tempId Room in roomState and shift dbRoom
+  else if (tempRoomId && current?._id === tempRoomId) { //is there tempId Room in roomState and shift dbRoom
 
     const index = arr.findIndex((r) => r._id === tempRoomId);
     let array = arr.filter((r) => r._id !== tempRoomId);
@@ -168,6 +192,7 @@ export const handleUpdatedRooms = (prev, data, current) => { //change //updateRo
     return { ...updated, [room.type]: newArr }
   } else {  //there is not dbRoom in state
 
+    //let array = arr.filter((r) => r._id !== room._id); // control if room is exist
     let newArr = [room, ...arr];
     console.log(" Container updated rooms  ", { ...updated, [room.type]: newArr });
     return { ...updated, [room.type]: newArr }
@@ -182,7 +207,7 @@ export const handleUpdatedMessages = (prev, data) => {
   const messageWithStatus = data.status !== undefined ? { ...msg, status: data.status } : msg;
 
 
-  console.log("New message came -->",messageWithStatus)
+  console.log("New message came -->", messageWithStatus)
 
   //sortingMessages
   const updated = { public: [...prev.public], private: [...prev.private] };
@@ -195,7 +220,7 @@ export const handleUpdatedMessages = (prev, data) => {
     const arr = newArr.map(r => {
 
       if (r.roomId !== tempRoomId) return r;
-     
+
       const exists = r.messages.some(m => m._id === tempMsgId);
 
       let updatedMessages;
@@ -205,9 +230,10 @@ export const handleUpdatedMessages = (prev, data) => {
           m._id === tempMsgId ? messageWithStatus : m);
       }
 
-      else {  
-         const isAlreadyAdded = r.messages.some(m => m._id === messageWithStatus._id);
-        updatedMessages = isAlreadyAdded ? r.messages : [...r.messages, messageWithStatus]; }// receiver has no msg
+      else {
+        const isAlreadyAdded = r.messages.some(m => m._id === messageWithStatus._id);
+        updatedMessages = isAlreadyAdded ? r.messages : [...r.messages, messageWithStatus];
+      }// receiver has no msg
 
 
       return {
@@ -235,13 +261,13 @@ export const handleUpdatedMessages = (prev, data) => {
 export const handleDeleteRoomList = (prev, type, list) => {
   const updated = { public: [...prev.public], private: [...prev.private] };
   const arr = updated[type];
-   const newArr = arr.filter((room) => !list.includes(room._id));
+  const newArr = arr.filter((room) => !list.includes(room._id));
 
   console.log("updated rooms after deletion ", { ...updated, [type]: newArr });
   return { ...updated, [type]: newArr };
 };
 export const handleDeleteMessageList = (prev, type, list) => {
- const updated = { public: [...prev.public], private: [...prev.private] };
+  const updated = { public: [...prev.public], private: [...prev.private] };
   const arr = updated[type] || [];
 
   let newArr = [];
@@ -249,17 +275,17 @@ export const handleDeleteMessageList = (prev, type, list) => {
   if (list.roomId) {
     newArr = arr.map((room) => {
       if (room.roomId === list.roomId) {
-     
+
         return {
           ...room,
           messages: room.messages.filter((msg) => !list.idList.includes(msg._id))
         };
       }
-      return room; 
+      return room;
     });
 
   } else {// delete roomids in list
-   
+
     newArr = arr.filter((room) => !list.includes(room.roomId));
   }
 

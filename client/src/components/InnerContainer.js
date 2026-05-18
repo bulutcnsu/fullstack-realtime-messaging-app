@@ -15,7 +15,7 @@ function InnerContainer({ rooms, setRooms, selectedRoom,
   const currentUsername = localStorage.getItem("username");
   const currentUserId  = localStorage.getItem("userId");
  
-  const handleUpdatePrivateGroupRoom = (room) => { //setPrivate users with http response 
+  const handleUpdatePrivateGroup = (room) => { //setPrivate users with http response 
 
     console.log("inner container a geldim", room)
     setRooms((prev) => {
@@ -69,7 +69,7 @@ const findPrivateChatWithUser = (rooms, targetUserId) => {
   return toggleRoomInfo ? (
     <RoomInfo room={selectedRoom} changeRoom={handleSelectedRoom}
       onBack={() => setToggleRoomInfo()}
-      updatePrivateGroup={handleUpdatePrivateGroupRoom} />
+      updatePrivateGroupList = {handleUpdatePrivateGroup} />
 
   ) : (
     <>

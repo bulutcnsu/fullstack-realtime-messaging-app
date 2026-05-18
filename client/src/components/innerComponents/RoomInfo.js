@@ -12,7 +12,7 @@ import { jwtDecode } from "jwt-decode";
 import { useState} from "react";
 import { updatePrivateGroupRoom } from "../../api/httpApi";
 
-const RoomInfo = ({ room, onBack, changeRoom, updatePrivateGroup }) => {
+const RoomInfo = ({ room, onBack, changeRoom, updatePrivateGroupList  }) => {
  
   const [showChild, setShowChild] = useState(false);
   const visibilty = room.type === "private"  && room.room_name !== null  ? "visible" : "hidden";
@@ -105,7 +105,7 @@ const RoomInfo = ({ room, onBack, changeRoom, updatePrivateGroup }) => {
       </Box>
 
            
-          {showChild && <AddUserPage show={setShowChild}  room={room}  updatePrivateGroup={updatePrivateGroup}/>}
+          {showChild && <AddUserPage show={setShowChild}  room={room}  updatePrivateGroupList ={updatePrivateGroupList}/>}
     </>
   );
 };

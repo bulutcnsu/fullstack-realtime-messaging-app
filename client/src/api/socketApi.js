@@ -60,13 +60,13 @@ export const disconnectSocket = () => {
 
 export const sendMessage = (message, username,room) => { //completed
 
-  console.log("formdan giden message",message)
+
    if (!socket) return;
     socket.emit("newMessage", message, username,room);
     console.log("📨 sending message");
 };
 
-export const getNewGroupRoom =(callback) =>{  //use UseEffect //socketUpdate
+export const getNewGroupRoom =(callback) =>{  //socketUpdate//
  if (!socket) return;  
    
       socket.on("newGroupRoom", (savedRoom) => {
@@ -93,23 +93,4 @@ if (!socket) return;
       callback(room); // added callback here
     });
 
-}
-export const getNewMessage = (callback) => { //completed
-
-if (!socket) return;
-
-    socket.on("dbNewMessage", (data) => {
-      console.log("🔥Backend Gelen Active Room  :", data.room," Message content :",data.message.content);
-        
-          callback(data);
-    });
-};
-
- export const getDeletedItemList = (callback) =>{
-if (!socket) return;
-
-    socket.on("itemDeleted", (item,type,list) => {
-      console.log("🔥Backend send  deleted type and List:", item,type,list);
-      callback(item,type,list);
-    });
 }

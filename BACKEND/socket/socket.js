@@ -4,23 +4,28 @@ const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { socketAuth } = require("../middleware/socketMiddleware");
-const { isRoomExist, getSocketUserId } = require("../controller/roomController");
+const { isRoomExist} = require("../controller/roomController");
 const { saveMessage } = require("..//controller/messageController");
 
 const cors = require("cors");
 let server = null;
+let senderInfo ;
+
+  const onlineUsers = new Map();
+
+  
+
 function initSocket(io) {
   io.use(socketAuth);
   server = io;
 
-  const onlineUsers = new Map();
 
   io.on("connection", (socket) => {
     
     onlineUsers.set(socket.userId, socket.id);
     console.log("connected user:", socket.userId);
-    console.log("online users", onlineUsers)
-
+    console.log("online users", onlineUsers);
+    senderInfo = { userId: socket.userId, socketId :socket.id};
     socket.on("joinRoom", (roomId) => {
     socket.join(roomId);
   });
@@ -29,6 +34,7 @@ function initSocket(io) {
       console.log("fronttan gelen mesaj", message);
        console.log("fronttan gelen room", roomObj);
       const sender = { userId: socket.userId, username: username };
+     
 
       try {
         const room = await isRoomExist(sender, roomObj);
@@ -36,23 +42,14 @@ function initSocket(io) {
 
         const savedMsg = await saveMessage(sender, room, message)
           if (savedMsg) {
-      
-  const receivers = room.user_list.filter(
-    user => user.userId.toString() !== socket.userId.toString());
-   
-  const sender =  onlineUsers.get(socket.userId.toString())
 
-  const activeReceivers = receivers.map(user => ({
-    ...user,
-    socketId: onlineUsers.get(user.userId.toString())
-  }));
-
-  
+ 
+  const activeReceivers = getOnlineReceivers(room,sender); //take room
   const isAnyReceiverOnline = activeReceivers.some(user => user.socketId !== undefined);
   const msgWithStatus = isAnyReceiverOnline ? "sent" : "sending";
 
 
-  io.to(sender).emit("dbNewMessage", {
+  io.to(socket.id.toString()).emit("dbNewMessage", { //message to owner to order state
         room,
         message: savedMsg,
         tempRoomId: roomObj._id,
@@ -63,7 +60,7 @@ function initSocket(io) {
  
   activeReceivers.forEach((receiver) => {
     if (receiver.socketId) {
-      console.log(`Mesaj gönderilen alıcı socketId (${receiver.userId}):`, receiver.socketId);
+      console.log(`Mesaj gönderilen alıcı socketId ):`, receiver.socketId);
       
       io.to(receiver.socketId).emit("dbNewMessage", {
         room,
@@ -89,7 +86,20 @@ function initSocket(io) {
 
   return io;
 }
+ function getOnlineReceivers(room)  {
+  console.log("  current user", senderInfo.userId);
 
+   const sender =  onlineUsers.get(senderInfo.userId.toString())
+    const receivers = room.user_list.filter(
+    user => user.userId.toString() !== senderInfo.userId.toString()); 
+   const activeReceivers = receivers.map(user => ({
+    ...user,
+    socketId: onlineUsers.get(user.userId.toString())
+  }));
+
+  return activeReceivers;
+
+}
 function getIO() {
   if (!server) throw new Error("Socket io not initiaized");
   return server;
@@ -97,4 +107,4 @@ function getIO() {
 
 
 
-module.exports = { initSocket, getIO };
+module.exports = { initSocket, getIO, getOnlineReceivers};

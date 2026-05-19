@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { fetchAllUsers } from "../../api/httpApi";
 import { updatePrivateGroup} from "../../api/httpApi";
 
-const AddUserPage = ({ show, room, updatePrivateGroupList }) => {
+const AddUserPage = ({ show, room }) => {
   const [checkedItems, setCheckedItems] = useState([]);
   const [entry, setEntry] = useState(null);
   const [users, setUsers] = useState([]);
@@ -30,8 +30,10 @@ const AddUserPage = ({ show, room, updatePrivateGroupList }) => {
   useEffect(() => {
     fetchAllUsers()
       .then((list) => {
-        let newList = list;
-        room.user_list.map((user) => {
+        let newList = [...list];
+        
+        // room.user_list null/undefined gelirse patlamasın diye ?. koyduk
+        room?.user_list?.forEach((user) => {
           newList = newList.filter((u) => user.userId !== u.id);
         });
 
@@ -39,7 +41,7 @@ const AddUserPage = ({ show, room, updatePrivateGroupList }) => {
         setUserList(newList);
       })
       .catch((err) => console.log(err));
-  }, []);
+  }, [room]);
 
   const handleClick = () => {
     show(false);
@@ -79,33 +81,36 @@ const AddUserPage = ({ show, room, updatePrivateGroupList }) => {
       setUserList(users);
     }
   };
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newList = checkedItems?.filter((el) => el.checkStatus === true);
-    console.log("checked newlist", newList)
-   
-if (newList.length > 0) {
-  try {
-    const res = await updatePrivateGroup(newList, room);
-    if (res && res.success) {
-      setColor("green");
-      setText("Changes have been saved");
+    console.log("checked newlist", newList);
 
-      updatePrivateGroupList(res.updatedRoom);
-    
-    } else {
-      setColor("red");
-    
-      setText(res?.message || "Nobody has added");
-      console.log("Operation failed on backend:", res);
+    if (newList.length > 0) {
+      try {
+        const res = await updatePrivateGroup(newList, room); // http call
+        
+        if (res && res.success) {
+          setColor("green");
+          setText("Changes have been saved");
+
+            setTimeout(() => {
+            show(false); 
+          }, 1500);
+
+        } else {
+          setColor("red");
+          setText(res?.message || "Nobody has been added");
+          console.log("Operation failed on backend:", res);
+        }
+      } catch (error) {
+        setColor("red");
+        setText("An unexpected error occurred");
+        console.error("UI Request failed:", error);
+      }
     }
-  } catch (error) {
-    setColor("red");
-    setText("An unexpected error occurred");
-    console.error("UI Request failed:", error);
-  }
-}}
+  };
   return (
     <Dialog open>
       <AppBar sx={{ position: "static", bgcolor: "#8091cce3" }}>

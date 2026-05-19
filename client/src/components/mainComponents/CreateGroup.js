@@ -15,7 +15,7 @@ import AppBar from '@mui/material/AppBar';
 import {createNewRoom} from "../../api/httpApi"
 
 
-const CreateGroup = ({show,newRoom}) => {
+const CreateGroup = ({show}) => {
 
 
 const [groupName, setGroupName] = useState("");
@@ -45,8 +45,8 @@ const [color,setColor]=useState("");
    if (data.success) {      
      setColor("green");   
      setMessage("Group has created succesfully");
-      newRoom(data.room)} 
-  
+
+   }      
     else {
     setColor("red");
     setMessage("Something went wrong");};

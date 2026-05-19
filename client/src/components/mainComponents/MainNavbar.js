@@ -14,7 +14,7 @@ import CreateGroup  from './CreateGroup';
 import { useState } from 'react';
 
 
-const  MainNavbar = ({setGroup,selectedGroup, addNewRoom,hideIcons,setHideIcons,roomList}) => {
+const  MainNavbar = ({setGroup,selectedGroup, hideIcons,setHideIcons,roomList}) => {
   const [value, setValue] = React.useState(0);
   const [showChild, setShowChild] = useState(false);
   const visibility = hideIcons === true ? "hidden" : "visible";
@@ -93,7 +93,7 @@ const  MainNavbar = ({setGroup,selectedGroup, addNewRoom,hideIcons,setHideIcons,
         </IconButton>
       </Box>
       
-    {showChild && <CreateGroup show={setShowChild} newRoom={(room)=>addNewRoom(room)} />}
+    {showChild && <CreateGroup show={setShowChild}  />}
   </>
 )}
      </Toolbar>  

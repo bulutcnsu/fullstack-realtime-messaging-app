@@ -26,7 +26,7 @@ router.get('/room/publicRooms/:username', Room.getPublicRooms );
 
 router.patch('/room/publicRooms/subscribe/:roomId', Room.updatedPublicRoom );
 
-router.post('/room/newGroup', Room.createNewRoom);
+router.post('/room/newGroup', Room.createNewGroupRoom);
 
 router.post('/room/updatePrivateGroup', Room.updatePrivateGroup);
 

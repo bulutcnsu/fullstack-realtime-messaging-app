@@ -39,7 +39,7 @@ export const init = (token) => {
       localStorage.removeItem("token");
       localStorage.removeItem("username");
 
-      window.dispatchEvent(new Event("forceLogout"));
+  //    window.dispatchEvent(new Event("forceLogout"));
     }
   });
 

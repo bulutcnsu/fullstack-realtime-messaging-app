@@ -8,18 +8,9 @@ const MainPage = ({ rooms, setRooms, setSelectedRoom}) => {
   const [hideSecretsIcons, setHideSecretsIcons] = useState(true);
   const [selectedRoomList, setSelectedRoomList] = useState([]);
  
-  const handleNewRoom = (room) => { // bunu alıp container e tasıyacaksın socket ile 
-    if (room == "") return;
-    const type = room.type;
 
-    setRooms((prevRooms) => ({
-      ...prevRooms,
-      [type]: [...prevRooms[type], room],
-    }));
 
-    };
-
-  const handleUpdatePublicRoom = (room) => {  ///setPublic users with http response
+ /* const handleUpdatePublicRoom = (room) => {  ///setPublic users with http response
     if (room) {
       const type = room.type; // 'public' veya 'private'
      
@@ -36,20 +27,18 @@ const MainPage = ({ rooms, setRooms, setSelectedRoom}) => {
         };
       });
     }
-  };
+  };*/
   return (
     <>
       <MainNavbar
         setGroup={setSelectedGroup}
         selectedGroup ={selectedGroup}
-        addNewRoom={(room) => handleNewRoom(room)}
-         hideIcons={hideSecretsIcons} setHideIcons ={() => {setHideSecretsIcons(true); setSelectedRoomList([])}}
+        hideIcons={hideSecretsIcons} setHideIcons ={() => {setHideSecretsIcons(true); setSelectedRoomList([])}}
         roomList ={selectedRoomList}
       />
       <ChatRoomList
         rooms={rooms}
         group={selectedGroup}
-        updateRoom={handleUpdatePublicRoom}
         onSelectRoom={setSelectedRoom}
         setHideIcons={setHideSecretsIcons}
         hideIcons={hideSecretsIcons}

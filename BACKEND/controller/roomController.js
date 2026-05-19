@@ -52,7 +52,7 @@ async function getRoomInfo(req, res) {
   res.json({ room });
 }
 
-async function createNewRoom(req, res) {
+async function createNewGroupRoom(req, res) {
   //completed
   const { groupname, description, type, username } = req.body;
   const query = await User.findOne({ username: username });
@@ -75,17 +75,41 @@ async function createNewRoom(req, res) {
       room: savedRoom,
     });
 
-    const { getIO } = require("../socket/socket");
+  const { getIO, getOnlineReceivers } = require("../socket/socket");
     const io = getIO();
+    const receivers = getOnlineReceivers(savedRoom);
+    console.log("controller a gelen recievers",receivers )
+    
+    const sender = receivers.filter(
+      receiver => receiver.userId?.toString() === user.userId?.toString()
+    );
+    
+    console.log("sender ı filterledim",sender)
 
-    savedRoom.user_list.forEach(u => {
-      io.to(u.userId.toString()).emit("newGroupRoom", savedRoom);
+    const others = receivers.filter(
+      receiver => receiver.userId?.toString() !== user.userId?.toString()
+    );
+     console.log("others ı filterledim",others)
+  
+     io.to(sender.socketId).emit("newGroupRoom", { //message to owner to order state
+         room: savedRoom, 
+        joined :true
+   });
+
+
+    others?.forEach((receiver) => { //to Receivers
+      if (receiver.socketId) {
+        console.log(`Room gönderilen alıcı socketId ):`, receiver.socketId);
+
+        io.to(receiver.socketId).emit("newGroupRoom", savedRoom);
+      }
     });
+
+ 
   } catch (err) {
     console.log(err);
     res.status(400).json({ error: "Something went wrong" });
   }
-
 
 }
 async function updatedPublicRoom(req, res) {
@@ -117,6 +141,18 @@ async function updatedPublicRoom(req, res) {
     }
     await room.save();
     res.status(200).json({ success: true, updatedRoom });
+   
+    const { getIO, getOnlineReceivers } = require("../socket/socket");
+   const io = getIO();
+  
+   const receivers = getOnlineReceivers(updatedRoom);
+
+  receivers?.forEach((receiver) => {
+  if (receiver.socketId) {
+    console.log(`Public Room güncellemesi  SocketId:`, receiver.socketId);
+    io.to(receiver.socketId).emit("publicGroupUpdated", updatedRoom);
+  }
+});
 
 
   } catch (err) {
@@ -182,45 +218,61 @@ async function deleteRoomList(req, res) {
   }
 }
 
-async function updatePrivateGroup(req, res) {
-  console.log("update Private room and list", req.body.list)
-  const list = req.body.list;
-  const room = await Room.findOne(req.body.room);
-  let updatedRoom = room;
-
+async function updatePrivateGroup(req, res) { 
+  console.log("update Private room and list", req.body?.list);
+  const list = req.body?.list;
+  
   try {
+
+    const roomId = req.body.room?._id || req.body.room; 
+    const room = await Room.findById(roomId);
+
+       if (!room) {
+      console.log("Oda veritabanında bulunamadı! Gelen veri:", req.body.room);
+      return res.status(404).json({ success: false, message: "Room not found" });
+    }
+
+  
+    if (!room.user_list) {
+      room.user_list = [];
+    }
+
+    let isChanged = false;
+
     list?.forEach((value) => {
-      if (
-        !room.user_list?.some((u) => u.userId == value.id)
-      ) {
+        if (!room.user_list.some((u) => u.userId == value.id)) {
         room.user_list.push({ userId: value.id, username: value.username });
-
-        console.log(value.username, "user has added the in list");
-
-        updatedRoom = { ...room.toObject() }
+        console.log(value.username, "user has added to the list");
+        isChanged = true;
       }
     });
 
-    await room.save();
+    if (isChanged) {
+      await room.save();
+    }
 
-    res.status(200).json({ success: true, updatedRoom }); //to owner
+
+    const updatedRoom = room.toObject();
+
+    res.status(200).json({ success: true, updatedRoom }); 
 
     const { getIO, getOnlineReceivers } = require("../socket/socket");
     const io = getIO();
     const receivers = getOnlineReceivers(updatedRoom);
 
-    receivers.forEach((receiver) => { //to Receivers
+    receivers?.forEach((receiver) => { 
       if (receiver.socketId) {
-        console.log(`Room gönderilen alıcı socketId ):`, receiver.socketId);
-
+        console.log(`Room gönderilen alıcı socketId :`, receiver.socketId);
         io.to(receiver.socketId).emit("privateGroupUpdated", updatedRoom);
       }
     });
 
-
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: err.message })
+    console.error("Backend Error in updatePrivateGroup:", err);
+  
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: err.message });
+    }
   }
 }
 module.exports = {
@@ -228,7 +280,7 @@ module.exports = {
   getRoomInfo,
   getPublicRooms,
   getUserRooms,
-  createNewRoom,
+  createNewGroupRoom,
   updatedPublicRoom,
   updatePrivateGroup,
   deleteRoomList,

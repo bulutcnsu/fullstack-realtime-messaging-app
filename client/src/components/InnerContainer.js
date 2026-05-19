@@ -15,25 +15,6 @@ function InnerContainer({ rooms, setRooms, selectedRoom,
   const currentUsername = localStorage.getItem("username");
   const currentUserId  = localStorage.getItem("userId");
  
-  const handleUpdatePrivateGroup = (room) => { //setPrivate users with http response 
-
-    console.log("inner container a geldim", room)
-    setRooms((prev) => {
-      const updated = { public: [...prev.public], private: [...prev.private] };
-
-      const arr = updated[room.type];
-      const index = arr.findIndex((r) => r._id === room._id); //-1 ise room yok
-      let newArr = [];
-
-      if (index > 0) {
-        newArr = arr.filter((r) => r._id !== room._id);
-        newArr.splice(index, 0, room);
-      }
-      console.log("yeni room list inner", newArr);
-      return { ...updated, [room.type]: newArr };
-    })
-    setSelectedRoom(room);
-  }
 
 const handleSelectedRoom = (room) => {
   const privateRooms = rooms.private.filter((r) => r.room_name === null);
@@ -69,7 +50,7 @@ const findPrivateChatWithUser = (rooms, targetUserId) => {
   return toggleRoomInfo ? (
     <RoomInfo room={selectedRoom} changeRoom={handleSelectedRoom}
       onBack={() => setToggleRoomInfo()}
-      updatePrivateGroupList = {handleUpdatePrivateGroup} />
+      />
 
   ) : (
     <>

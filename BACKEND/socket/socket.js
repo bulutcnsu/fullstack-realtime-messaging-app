@@ -44,7 +44,7 @@ function initSocket(io) {
           if (savedMsg) {
 
  
-  const activeReceivers = getOnlineReceivers(room,sender); //take room
+  const activeReceivers = getOnlineReceivers(room); //take room
   const isAnyReceiverOnline = activeReceivers.some(user => user.socketId !== undefined);
   const msgWithStatus = isAnyReceiverOnline ? "sent" : "sending";
 
@@ -57,7 +57,9 @@ function initSocket(io) {
         status: msgWithStatus
   });
   console.log(`Sender  e mesaj gönderildi (${sender}):`);
- 
+
+  activeReceivers = activeReceivers.filter( user => user.userId.toString() !== senderInfo.userId.toString()) ;
+ // filter sender in the list
   activeReceivers.forEach((receiver) => {
     if (receiver.socketId) {
       console.log(`Mesaj gönderilen alıcı socketId ):`, receiver.socketId);
@@ -89,15 +91,21 @@ function initSocket(io) {
  function getOnlineReceivers(room)  {
   console.log("  current user", senderInfo.userId);
 
-   const sender =  onlineUsers.get(senderInfo.userId.toString())
-    const receivers = room.user_list.filter(
-    user => user.userId.toString() !== senderInfo.userId.toString()); 
-   const activeReceivers = receivers.map(user => ({
-    ...user,
-    socketId: onlineUsers.get(user.userId.toString())
-  }));
+ if (!room || !room.user_list) return [];
+    
 
-  return activeReceivers;
+ const activeReceivers = room.user_list.map(user => {
+
+  const rawUser = user.toObject(); //get rid of protptypes
+  
+  return {
+    userId: rawUser.userId,
+    username: rawUser.username,
+    socketId: onlineUsers.get(rawUser.userId.toString()) || null
+  };
+});
+
+ return activeReceivers;
 
 }
 function getIO() {

@@ -28,6 +28,7 @@ const ChatRoomList = ({
   const visibile = type === "private" ? "hidden" : "visible";
   const username = localStorage.getItem("username");
   const timerRef = useRef(null);
+  
 
 
   const handlePress = (room, event) => {
@@ -89,7 +90,7 @@ const ChatRoomList = ({
           boxSizing: "border-box",
         }}
       >
-        {Object.values(rooms[type])?.map((room) => (
+        {Object.values(rooms[type] || [])?.map((room) => (
 
           <div key={room._id}
             onMouseDown={(e) => handlePress(room, e)}

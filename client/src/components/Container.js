@@ -91,45 +91,62 @@ function Container() {
       );
     };
 
-    const handlePrivateGroupUpdate = (room) => {
-      console.log("socketten gelen yakalanan yeni private room:", room);
-      setRooms(prev => {
+ const handlePrivateGroupUpdate = (room) => {
+  console.log("socketten gelen yakalanan yeni updated private room:", room);
+  setRooms(prev => 
+    handleUpdatedRooms(prev, room, selectedRoomRef.current) // ✅ Başına return eklendi (tek satır arrow function)
+  );
+    if (selectedRoomRef.current && selectedRoomRef.current._id === room._id) {
+       setSelectedRoom(room); 
+      selectedRoomRef.current = room; 
+  }
 
-         handleUpdatedRooms(prev, room, selectedRoomRef.current)
-    /*    const updated = { public: [...prev.public], private: [...prev.private] };
-        const arr = updated[room.type];
-        let newArr = [room, ...arr];
-        console.log(" Container updated rooms  ", { ...updated, [room.type]: newArr });
-        return { ...updated, [room.type]: newArr }*/
-      });
-    }
+};
 
+  const handleAddNewGroupRoom = (room) => {
+  console.log("socketten gelen yakalanan yeni group room:", room);
+  setRooms(prev => 
+    handleUpdatedRooms(prev, room, selectedRoomRef.current) // ✅ Başına return eklendi (tek satır arrow function)
+  );
+};
 
+ const handlePublicGroupUpdate =(room) =>{
+  console.log("socketten gelen yakalanan yeni updated public room:", room);
+  setRooms(prev => 
+    handleUpdatedRooms(prev, room, selectedRoomRef.current) 
+  );
+ }
 
 
     socket.on("dbNewMessage", handleNewMessage);
     socket.on("itemDeleted", handleDeletedItem);
-    socket.on("privateGroupUpdated", handlePrivateGroupUpdate)
+    socket.on("privateGroupUpdated", handlePrivateGroupUpdate);
+    socket.on("newGroupRoom",handleAddNewGroupRoom );
+    socket.on("publicGroupUpdated",handlePublicGroupUpdate);
+    
 
 
     return () => {
       socket.off("dbNewMessage", handleNewMessage);
       socket.off("itemDeleted", handleDeletedItem);
-      socket.off("privateGroupUpdated");
+      socket.off("privateGroupUpdated", handlePrivateGroupUpdate);
+      socket.off("newGroupRoom",handleAddNewGroupRoom )
+      socket.off("publicGroupUpdated",handlePublicGroupUpdate);
     };
 
   }, [isAuth]);
 
 
   console.log("isAuth baslangıc degeri:", isAuth);
-  console.log("current selected room is : ", selectedRoom);
+  console.log("current selected room is : ", selectedRoom)
+
+
 
   return (
     <div className="myContainer">
       {isAuth === false ? (
         <AuthForm
           onAuthSuccess={(token, username) => {
-            console.log(" auth form 1 çalıştı")
             localStorage.setItem("token", token);
             localStorage.setItem("username", username);
 
@@ -163,19 +180,20 @@ export const handleUpdatedRooms = (prev, data, current) => { //change //updateRo
   //sortingRooms
   const updated = { public: [...prev.public], private: [...prev.private] };
   
-
   const room = data?._id ? data : data?.room; // data has id then data is a room
+   
+  if (!room) return prev;
+ 
   const tempRoomId = data?.tempRoomId; 
   const arr = updated[room.type] || [];
 
- if (!room) return prev;
   
   const isEqual =  tempRoomId && room._id === tempRoomId; //if there is tempRoomId go to else 
-
+  const index = arr.findIndex((r) => r._id === room._id); //index must be >=0
 
   if (isEqual) { // dbRoom is exist in state ,just order rooms
 
-    const index = arr.findIndex((r) => r._id === room._id); //index must be >=0
+
     let newArr = arr.filter((r) => r._id !== room._id);
     newArr.unshift(room);
 
@@ -190,7 +208,25 @@ export const handleUpdatedRooms = (prev, data, current) => { //change //updateRo
 
     console.log("updated rooms ", { ...updated, [room.type]: newArr });
     return { ...updated, [room.type]: newArr }
-  } else {  //there is not dbRoom in state
+ 
+  }else if((index > -1 && !tempRoomId)){ // there is a room,just userList changed
+  const newArr = [...arr];
+ 
+  if (room.type === "public") {
+       let filteredArr = arr.filter((r) => r._id !== room._id);
+       filteredArr.unshift(room); // En üste taşı
+       
+       console.log("Public room updated and moved to top!");
+       return { ...updated, [room.type]: filteredArr };
+     } 
+         else {
+        newArr[index] = room;
+       console.log("Private room updated in its current position");
+       return { ...updated, [room.type]: newArr };
+     }
+  }
+  
+  else {  //there is not dbRoom in state
 
     //let array = arr.filter((r) => r._id !== room._id); // control if room is exist
     let newArr = [room, ...arr];

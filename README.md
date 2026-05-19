@@ -100,7 +100,7 @@ cd YOUR_REPO_NAME
 │   │   ├── components/     # Chat, Sidebar, Modals, Forms
 │   │   ├── context/        # Auth & Socket States
 │   │   └── ...
-├── server/                 # Express.js Backend (MVC)
+├── BACKEND/                 # Express.js Backend (MVC)
 │   ├── controllers/        # Auth, Message, Room Controllers
 │   ├── models/             # User, Message, Room Schemas
 │   ├── routes/             # API Endpoints

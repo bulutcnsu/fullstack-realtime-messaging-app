@@ -46,8 +46,6 @@ function ChatForm({ selectedRoom,setSelectedRoom, rooms, setRooms }) {
            setRooms(prev => {
                 const updated = { public: [...prev.public], private: [...prev.private] };
                  let arr = [updated.private];
-               
-                     
 
             if (!tempRoom.hasOwnProperty('type')) { 
                     
@@ -58,21 +56,20 @@ function ChatForm({ selectedRoom,setSelectedRoom, rooms, setRooms }) {
                 user_list: [selectedRoom], //will update at backend
                 room_name : selectedRoom.username}
 
-                arr = [tempRoom, ...updated.private];
+                arr = [tempRoom, ...updated.private]; //if there is not room has type property then add the state
                
                  console.log(`ChatForm  updated ${type} room array :`  , arr)
                  
-                 
                  return { ...updated, [type]: arr };
 
-            } else {   return {...updated};  }});
+            } else {   return {...updated};  }}); // dont add the state
 
         
          setMessages(prev => { //check Room is in message Context ,if not create
                 const updated = { public: [...prev.public], private: [...prev.private] };
                 let arr = [...updated.private];
 
-                console.log("chatForm a gelen set msg tempRoom", tempRoom)
+          
                 const index =  arr.findIndex((r) => r.roomId === tempRoom._id);
                 console.log("MSG Room da bulunan index",index)
 

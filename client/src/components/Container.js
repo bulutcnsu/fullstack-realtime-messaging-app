@@ -69,7 +69,13 @@ function Container() {
     const socket = getSocket();
     if (!socket) return;
 
+   
+
     const handleNewMessage = (data) => {
+
+      const room = data.room;
+     const tempRoomId = data.tempRoomId;
+
       setRooms(prev =>
         handleUpdatedRooms(prev, data, selectedRoomRef.current)
       );
@@ -77,6 +83,15 @@ function Container() {
       setMessages(prev =>
         handleUpdatedMessages(prev, data)
       );
+    
+      setSelectedRoom(prev => {
+    if (prev?._id === tempRoomId || prev?._id === room._id) {
+      return room; 
+    }
+    return prev;
+  });
+    
+  
     };
 
     const handleDeletedItem = (item, type, list) => {
@@ -94,7 +109,7 @@ function Container() {
  const handlePrivateGroupUpdate = (room) => {
   console.log("socketten gelen yakalanan yeni updated private room:", room);
   setRooms(prev => 
-    handleUpdatedRooms(prev, room, selectedRoomRef.current) // ✅ Başına return eklendi (tek satır arrow function)
+    handleUpdatedRooms(prev, room, selectedRoomRef.current) 
   );
     if (selectedRoomRef.current && selectedRoomRef.current._id === room._id) {
        setSelectedRoom(room); 
@@ -175,123 +190,119 @@ function Container() {
     </div>
   );
 }
-
-export const handleUpdatedRooms = (prev, data, current) => { //change //updateRoomtemp 
-  //sortingRooms
+export const handleUpdatedRooms = (prev, data, current) => {
   const updated = { public: [...prev.public], private: [...prev.private] };
   
-  const room = data?._id ? data : data?.room; // data has id then data is a room
-   
+  const room = data?._id ? data : data?.room;
   if (!room) return prev;
  
   const tempRoomId = data?.tempRoomId; 
   const arr = updated[room.type] || [];
 
+  // 1. Durum: Gönderici tarafında "temp-" odasını gerçek DB odasıyla değiştirme
+  if (tempRoomId) {
+    // State içinde geçici id'ye sahip odayı VEYA yanlışlıkla zaten eklenmiş gerçek id'li odayı ara
+    const hasTempRoom = arr.some(r => r._id === tempRoomId);
+    const hasRealRoom = arr.some(r => r._id === room._id);
+
+    if (hasTempRoom || hasRealRoom) {
+      
+      let filteredArr = arr.filter((r) => r._id !== tempRoomId && r._id !== room._id);
   
-  const isEqual =  tempRoomId && room._id === tempRoomId; //if there is tempRoomId go to else 
-  const index = arr.findIndex((r) => r._id === room._id); //index must be >=0
+      let newArr = [room, ...filteredArr];
 
-  if (isEqual) { // dbRoom is exist in state ,just order rooms
+      console.log("Gönderici odası güncellendi ve en üste taşındı:", { ...updated, [room.type]: newArr });
+      return { ...updated, [room.type]: newArr };
+    }
+  }
 
+    const index = arr.findIndex((r) => r._id === room._id);
 
-    let newArr = arr.filter((r) => r._id !== room._id);
-    newArr.unshift(room);
-
-    console.log("updated rooms ", { ...updated, [room.type]: newArr }); // just order state
+  if (index > -1) {
+    if (room.type === "public") {
+      let filteredArr = arr.filter((r) => r._id !== room._id);
+      filteredArr.unshift(room); 
+      return { ...updated, [room.type]: filteredArr };
+    } else {
+     
+      const newArr = [...arr];
+      newArr[index] = room;
+      
+      console.log("Private oda mevcut yerinde güncellendi");
+      return { ...updated, [room.type]: newArr };
+    }
+  }
+  
+  else {  
+  
+    let filteredArr = arr.filter((r) => r._id !== room._id);
+    let newArr = [room, ...filteredArr];
+    
+    console.log("Yeni oda state'e eklendi:", { ...updated, [room.type]: newArr });
     return { ...updated, [room.type]: newArr };
-  }
-  else if (tempRoomId && current?._id === tempRoomId) { //is there tempId Room in roomState and shift dbRoom
-
-    const index = arr.findIndex((r) => r._id === tempRoomId);
-    let array = arr.filter((r) => r._id !== tempRoomId);
-    let newArr = [room, ...array];
-
-    console.log("updated rooms ", { ...updated, [room.type]: newArr });
-    return { ...updated, [room.type]: newArr }
- 
-  }else if((index > -1 && !tempRoomId)){ // there is a room,just userList changed
-  const newArr = [...arr];
- 
-  if (room.type === "public") {
-       let filteredArr = arr.filter((r) => r._id !== room._id);
-       filteredArr.unshift(room); // En üste taşı
-       
-       console.log("Public room updated and moved to top!");
-       return { ...updated, [room.type]: filteredArr };
-     } 
-         else {
-        newArr[index] = room;
-       console.log("Private room updated in its current position");
-       return { ...updated, [room.type]: newArr };
-     }
-  }
-  
-  else {  //there is not dbRoom in state
-
-    //let array = arr.filter((r) => r._id !== room._id); // control if room is exist
-    let newArr = [room, ...arr];
-    console.log(" Container updated rooms  ", { ...updated, [room.type]: newArr });
-    return { ...updated, [room.type]: newArr }
   }
 };
 
+
 export const handleUpdatedMessages = (prev, data) => {
-  const msg = data.message
-  const room = data.room
-  const tempMsgId = data.tempMsgId
-  const tempRoomId = data.tempRoomId
+  const msg = data.message;
+  const room = data.room;
+  const tempMsgId = data.tempMsgId;
+  const tempRoomId = data.tempRoomId;
   const messageWithStatus = data.status !== undefined ? { ...msg, status: data.status } : msg;
 
+  console.log("New message came -->", messageWithStatus);
 
-  console.log("New message came -->", messageWithStatus)
-
-  //sortingMessages
   const updated = { public: [...prev.public], private: [...prev.private] };
   const newArr = [...updated[room.type]];
-  const index = updated[room.type].findIndex((r) => r.roomId === tempRoomId); //
+  
+ 
+  const index = newArr.findIndex((r) => r.roomId === tempRoomId || r.roomId === room._id);
 
+  if (index > -1) { 
+    const arr = newArr.map((r, id) => {
+     
+      if (id !== index) return r;
 
-  if (index >= 0) { //roomId has found in state, just override
-
-    const arr = newArr.map(r => {
-
-      if (r.roomId !== tempRoomId) return r;
-
-      const exists = r.messages.some(m => m._id === tempMsgId);
+      
+      const tempMsgExists = r.messages.some(m => m._id === tempMsgId);
+      const realMsgExists = r.messages.some(m => m._id === messageWithStatus._id);
 
       let updatedMessages;
 
-      if (exists) { // sender state has tempMsg
+      if (tempMsgId && tempMsgExists) { 
+      
         updatedMessages = r.messages.map(m =>
-          m._id === tempMsgId ? messageWithStatus : m);
+          m._id === tempMsgId ? messageWithStatus : m
+        );
+      } else if (realMsgExists) {
+        
+        updatedMessages = r.messages;
+      } else {
+        
+        updatedMessages = [...r.messages, messageWithStatus];
       }
 
-      else {
-        const isAlreadyAdded = r.messages.some(m => m._id === messageWithStatus._id);
-        updatedMessages = isAlreadyAdded ? r.messages : [...r.messages, messageWithStatus];
-      }// receiver has no msg
-
-
+     
       return {
         ...r,
-        roomId: room._id,
+        roomId: room._id, 
         messages: updatedMessages
-      }
-    })
+      };
+    });
 
     console.log("Container updated messages ", { ...updated, [room.type]: arr });
-    return { ...updated, [room.type]: arr }
-
-  } else { //there is no room in that state ,so create
-
-    const newRoom = { roomId: room._id, messages: [messageWithStatus], };
-    const arr = [newRoom, ...newArr]
-
-    console.log("updated Messages ", { ...updated, [room.type]: arr });
     return { ...updated, [room.type]: arr };
 
+  } else { 
+ 
+    const newRoom = { roomId: room._id, messages: [messageWithStatus] };
+    const arr = [newRoom, ...newArr];
+
+    console.log("updated Messages (New Room Created) ", { ...updated, [room.type]: arr });
+    return { ...updated, [room.type]: arr };
   }
-}
+};
 
 
 export const handleDeleteRoomList = (prev, type, list) => {

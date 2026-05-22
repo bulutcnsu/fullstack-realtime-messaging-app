@@ -80,31 +80,33 @@ async function createNewGroupRoom(req, res) {
     const receivers = getOnlineReceivers(savedRoom);
     console.log("controller a gelen recievers",receivers )
     
-    const sender = receivers.filter(
-      receiver => receiver.userId?.toString() === user.userId?.toString()
-    );
+ const sender = receivers.find(
+  receiver => receiver.userId?.toString() === user.userId?.toString()
+);
     
-    console.log("sender ı filterledim",sender)
+   
 
-    const others = receivers.filter(
-      receiver => receiver.userId?.toString() !== user.userId?.toString()
-    );
-     console.log("others ı filterledim",others)
-  
-     io.to(sender.socketId).emit("newGroupRoom", { //message to owner to order state
-         room: savedRoom, 
-        joined :true
-   });
+  const others = receivers.filter(
+  receiver => receiver.userId?.toString() !== user.userId?.toString()
+);
+     
+  if (sender && sender.socketId) {
+  io.to(sender.socketId).emit("newGroupRoom", { 
+    room: savedRoom, 
+    joined: true
+  });
+ 
+} else {
+  console.log("Sender socket bağlantısı bulunamadı.");
+}
 
 
-    others?.forEach((receiver) => { //to Receivers
-      if (receiver.socketId) {
-        console.log(`Room gönderilen alıcı socketId ):`, receiver.socketId);
-
-        io.to(receiver.socketId).emit("newGroupRoom", savedRoom);
-      }
-    });
-
+others?.forEach((receiver) => { 
+  if (receiver.socketId) {
+    console.log(`Room gönderilen alıcı socketId :`, receiver.socketId);
+    io.to(receiver.socketId).emit("newGroupRoom", savedRoom);
+  }
+});
  
   } catch (err) {
     console.log(err);

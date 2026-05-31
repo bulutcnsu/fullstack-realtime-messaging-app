@@ -3,7 +3,7 @@ import MainNavbar from "./mainComponents/MainNavbar";
 import ChatRoomList from "./mainComponents/ChatRoomList";
 import { createGroup } from "../api/socketApi";
 
-const MainPage = ({ rooms, setRooms, setSelectedRoom}) => {
+const MainPage = ({ rooms, selectedRoom, setRooms, setSelectedRoom}) => {
   const [selectedGroup, setSelectedGroup] = useState("chats");
   const [hideSecretsIcons, setHideSecretsIcons] = useState(true);
   const [selectedRoomList, setSelectedRoomList] = useState([]);
@@ -39,6 +39,7 @@ const MainPage = ({ rooms, setRooms, setSelectedRoom}) => {
       <ChatRoomList
         rooms={rooms}
         group={selectedGroup}
+        selectedRoom ={selectedRoom}
         onSelectRoom={setSelectedRoom}
         setHideIcons={setHideSecretsIcons}
         hideIcons={hideSecretsIcons}

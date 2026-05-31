@@ -59,7 +59,7 @@ const findPrivateChatWithUser = (rooms, targetUserId) => {
         setHideIcons={() => { setHideSecretsIcons(true); setSelectedMessageList([]) }}
         onTapping={() => setToggleRoomInfo(true)} onBack={() => setSelectedRoom(null)} />
 
-      <ChatList selectedRoom={selectedRoom} hideIcons={setHideSecretsIcons} setHideIcons={setHideSecretsIcons}
+      <ChatList selectedRoom={selectedRoom} setRooms={setRooms} hideIcons={setHideSecretsIcons} setHideIcons={setHideSecretsIcons}
         selectedMessageList={selectedMessageList}
         setSelectedMessageList={(msg) => setSelectedMessageList(msg)} />
 

@@ -6,6 +6,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Button from "@mui/material/Button";
 import Avatar from "../innerComponents/AvatarPage";
 import Typography from "@mui/material/Typography";
+import MsgIcon from '@mui/icons-material/MarkEmailUnread';
 import styles from "../../css/styles.module.css";
 import { updatePublicRoom } from "../../api/httpApi";
 import { useChat } from "../../context/ChatContext";
@@ -17,6 +18,7 @@ const ChatRoomList = ({
   onSelectRoom,
   updateRoom,
   hideIcons,
+  selectedRoom,
   setHideIcons,
   selectedRoomList,
   setSelectedRoomList,
@@ -28,7 +30,7 @@ const ChatRoomList = ({
   const visibile = type === "private" ? "hidden" : "visible";
   const username = localStorage.getItem("username");
   const timerRef = useRef(null);
-  
+
 
 
   const handlePress = (room, event) => {
@@ -122,7 +124,7 @@ const ChatRoomList = ({
                 primary={
                   room.room_name ||
                   room.user_list.find((u) => u.username !== username)
-                    ?.username  || room.user_list[0].username
+                    ?.username || room.user_list[0].username
                 }
                 secondary={
                   <React.Fragment>
@@ -141,20 +143,58 @@ const ChatRoomList = ({
                   </React.Fragment>
                 }
               />
-              <Button
-                size="small"
-                variant="contained"
-                onClick={(e) => toggleJoin(e, room._id)}
-                sx={{
-                  visibility: visibile,
-                  backgroundColor: "#b4bfdd",
-                  borderRadius: "20%",
-                  fontWeight: 600,
-                  color: "#654fc4",
-                }}
-              >
-                {room.joined ? "JOINED" : "JOIN"}{" "}
-              </Button>
+
+              {room.unreadCount > 0 &&  ( // show msg icon
+
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.2rem", 
+                  marginLeft: "1.5rem",
+                  alignSelf: "center"
+                }}>
+
+                 <MsgIcon sx={{ color: "#5771cf", fontSize: "1.3rem" }} />
+
+                  <div style={{
+                    backgroundColor: "#e9e9ed",
+                    color: "#3052ce",
+                    borderRadius: "50%",
+                    minWidth: ".9rem",
+                    height: "1.2rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: ".8rem",
+                    fontWeight: "bold",
+                    padding: "0 4px",
+                    marginLeft: ".3rem",
+                    alignSelf: "center",
+                    borderColor:"#5771cf",
+                    boxShadow: "0px 1px 3px rgba(0,0,0,0.15)"
+                  }}>
+                    {room.unreadCount}
+                  </div>
+                </div>
+              )}
+              {visibile && (
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={(e) => toggleJoin(e, room._id)}
+                  sx={{
+                    display: room.type === "public" ? "inline-flex" : "none",
+                    backgroundColor: "#b4bfdd",
+                    borderRadius: "20%",
+                    fontWeight: 600,
+                    marginLeft: "auto",
+                    color: "#654fc4",
+                    flexShrink: 0
+                  }}
+                >
+                  {room.joined ? "JOINED" : "JOIN"}{" "}
+                </Button>
+              )}
             </ListItem>
 
             <Divider variant="inset" component="li" />

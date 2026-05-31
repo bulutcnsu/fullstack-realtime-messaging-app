@@ -73,7 +73,7 @@ function Container() {
 
     const handleNewMessage = (data) => {
 
-      const room = data.room;
+     const room = data.room;
      const tempRoomId = data.tempRoomId;
 
       setRooms(prev =>
@@ -84,13 +84,21 @@ function Container() {
         handleUpdatedMessages(prev, data)
       );
     
-      setSelectedRoom(prev => {
+     setSelectedRoom(prev => {
+  
     if (prev?._id === tempRoomId || prev?._id === room._id) {
-      return room; 
+      
+      setRooms(prev => {
+        const updated = { public: [...prev.public], private: [...prev.private] };
+        const arr = updated[room.type] || [];
+        
+        const newArr = arr.map(r => r._id === room._id ? { ...r, unreadCount: 0 } : r);
+        return { ...prev, [room.type]: newArr };
+      });
+      return { ...room, unreadCount: 0 }; 
     }
     return prev;
   });
-    
   
     };
 
@@ -126,7 +134,7 @@ function Container() {
 };
 
  const handlePublicGroupUpdate =(room) =>{
-  console.log("socketten gelen yakalanan yeni updated public room:", room);
+ 
   setRooms(prev => 
     handleUpdatedRooms(prev, room, selectedRoomRef.current) 
   );
@@ -155,8 +163,6 @@ function Container() {
   console.log("isAuth baslangıc degeri:", isAuth);
   console.log("current selected room is : ", selectedRoom)
 
-
-
   return (
     <div className="myContainer">
       {isAuth === false ? (
@@ -174,6 +180,7 @@ function Container() {
         <MainPage
           rooms={rooms}
           setRooms={setRooms}
+          selectedRoom={selectedRoom}
           setSelectedRoom={setSelectedRoom}
         />
       ) : (
@@ -193,15 +200,25 @@ function Container() {
 export const handleUpdatedRooms = (prev, data, current) => {
   const updated = { public: [...prev.public], private: [...prev.private] };
   
-  const room = data?._id ? data : data?.room;
-  if (!room) return prev;
+   const dbRoom = data?._id ? data : data?.room;
+  if (!dbRoom) return prev;
+
+  const room = { ...dbRoom};
  
+  if (current?._id === room._id) {
+    room.unreadCount = 0;
+  } else {
+    const oldRoom = (updated[room.type] || []).find(r => r._id === room._id);
+    const oldUnread = oldRoom ? (oldRoom.unreadCount || 0) : 0;
+        room.unreadCount = oldUnread + 1;
+  }
+    
   const tempRoomId = data?.tempRoomId; 
   const arr = updated[room.type] || [];
 
-  // 1. Durum: Gönderici tarafında "temp-" odasını gerçek DB odasıyla değiştirme
+ 
   if (tempRoomId) {
-    // State içinde geçici id'ye sahip odayı VEYA yanlışlıkla zaten eklenmiş gerçek id'li odayı ara
+
     const hasTempRoom = arr.some(r => r._id === tempRoomId);
     const hasRealRoom = arr.some(r => r._id === room._id);
 

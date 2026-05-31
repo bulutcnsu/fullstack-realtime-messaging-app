@@ -4,18 +4,23 @@ import { useChat } from "../../context/ChatContext"
 import ChatItem from "./ChatItem"
 
 
-function ChatList({ selectedRoom, hideIcons, setHideIcons, selectedMessageList, setSelectedMessageList }) {
+function ChatList({ selectedRoom,setRooms, hideIcons, setHideIcons, selectedMessageList, setSelectedMessageList }) {
   const { messages } = useChat();
   const messagesEndRef = useRef(null)
   const [longPress, setLongPress] = useState(false);
   const timerRef = useRef(null);
 
   const username = localStorage.getItem('username');
-   let currentRoom;
+  
+   let currentRoom ;
+ 
+
+
   
   if (selectedRoom.hasOwnProperty("type")) {
     currentRoom = messages[selectedRoom.type].find(r => r.roomId === selectedRoom._id); //find exact room in message Context
-    }
+   
+  }
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });

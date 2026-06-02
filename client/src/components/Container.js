@@ -24,9 +24,31 @@ function Container() {
   const selectedRoomRef = useRef(null);
 
 
-  useEffect(() => {
-    selectedRoomRef.current = selectedRoom;
-  }, [selectedRoom]);
+useEffect(() => {
+
+  selectedRoomRef.current = selectedRoom;
+
+
+  if (selectedRoom && selectedRoom.type) {
+    const type = selectedRoom.type; 
+
+    setRooms((prev) => {
+    
+      
+      const updatedList = prev[type].map((room) => {
+        if (room._id === selectedRoom._id || room === selectedRoom) {
+          return { ...room, unreadCount: 0 };
+        }
+        return room;
+      });
+
+      return {
+        ...prev,
+        [type]: updatedList,
+      };
+    });
+  }
+}, [selectedRoom]);
 
   useEffect(() => {
 
@@ -85,17 +107,11 @@ function Container() {
       );
     
      setSelectedRoom(prev => {
-  
     if (prev?._id === tempRoomId || prev?._id === room._id) {
-      
-      setRooms(prev => {
-        const updated = { public: [...prev.public], private: [...prev.private] };
-        const arr = updated[room.type] || [];
-        
-        const newArr = arr.map(r => r._id === room._id ? { ...r, unreadCount: 0 } : r);
-        return { ...prev, [room.type]: newArr };
-      });
-      return { ...room, unreadCount: 0 }; 
+        return { 
+      ...room, 
+       unreadCount: 0 
+    };
     }
     return prev;
   });
@@ -134,9 +150,9 @@ function Container() {
 };
 
  const handlePublicGroupUpdate =(room) =>{
- 
+ console.log("public room güncellemesi socket, container")
   setRooms(prev => 
-    handleUpdatedRooms(prev, room, selectedRoomRef.current) 
+    handlePublicGroupUpdate(prev, room, selectedRoomRef.current) 
   );
  }
 
@@ -200,18 +216,24 @@ function Container() {
 export const handleUpdatedRooms = (prev, data, current) => {
   const updated = { public: [...prev.public], private: [...prev.private] };
   
-   const dbRoom = data?._id ? data : data?.room;
-  if (!dbRoom) return prev;
+   const room = data?._id ? data : data?.room;
+  if (!room) return prev;
 
-  const room = { ...dbRoom};
  
-  if (current?._id === room._id) {
-    room.unreadCount = 0;
+   if (current?._id !== room._id) {
+   
+    if (room.joined === true || room.type === 'private') {
+   
+      const oldRoom = (updated[room.type] || []).find(r => r._id === room._id);
+   
+      const oldUnread = oldRoom ? (oldRoom.unreadCount || 0) : 0;
+     
+       room.unreadCount = oldUnread + 1;
+  
   } else {
-    const oldRoom = (updated[room.type] || []).find(r => r._id === room._id);
-    const oldUnread = oldRoom ? (oldRoom.unreadCount || 0) : 0;
-        room.unreadCount = oldUnread + 1;
-  }
+    room.unreadCount = 0 }
+ 
+  }else{ room.unreadCount = 0 }
     
   const tempRoomId = data?.tempRoomId; 
   const arr = updated[room.type] || [];
@@ -260,7 +282,27 @@ export const handleUpdatedRooms = (prev, data, current) => {
   }
 };
 
+export const handlePublicGroupUpdated = (prev, room) => {
+  
+  const updated = { public: [...prev.public], private: [...prev.private] }
+  const newArr = [...updated[room.type]];
 
+  if (!room || room.type !== "public") return prev;
+
+     const newRoom = { ...room }; 
+      newRoom.unreadCount = 0;
+
+
+  let filteredArr = newArr.filter((r) => r._id !== newRoom._id);
+
+  if (newRoom.joined === false) {
+      filteredArr.push(newRoom);
+  } else {
+      filteredArr.unshift(newRoom);
+  }
+
+    return { ...updated, [room.type]: newArr };
+};
 export const handleUpdatedMessages = (prev, data) => {
   const msg = data.message;
   const room = data.room;
@@ -321,7 +363,6 @@ export const handleUpdatedMessages = (prev, data) => {
   }
 };
 
-
 export const handleDeleteRoomList = (prev, type, list) => {
   const updated = { public: [...prev.public], private: [...prev.private] };
   const arr = updated[type];
@@ -358,3 +399,4 @@ export const handleDeleteMessageList = (prev, type, list) => {
 };
 
 export default Container;
+

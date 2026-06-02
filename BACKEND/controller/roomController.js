@@ -142,19 +142,33 @@ async function updatedPublicRoom(req, res) {
       console.log(user.username, "user has removed the in list");
     }
     await room.save();
-    res.status(200).json({ success: true, updatedRoom });
+    res.status(200).json({ success: true });
    
     const { getIO, getOnlineReceivers } = require("../socket/socket");
    const io = getIO();
   
    const receivers = getOnlineReceivers(updatedRoom);
 
-  receivers?.forEach((receiver) => {
-  if (receiver.socketId) {
-    console.log(`Public Room güncellemesi  SocketId:`, receiver.socketId);
-    io.to(receiver.socketId).emit("publicGroupUpdated", updatedRoom);
-  }
-});
+   const baseRoomObj = room.toObject();
+
+    receivers?.forEach((receiver) => {
+      if (receiver.socketId) {
+     
+        const isThisReceiverJoined = baseRoomObj.user_list.some(
+          (u) => u.userId.toString() === receiver.userId.toString()
+        );
+
+    
+        const personalRoomData = { 
+          ...baseRoomObj, 
+          joined: isThisReceiverJoined 
+        };
+
+        console.log( `${receiver.username}, Joined: ${isThisReceiverJoined}`);
+        io.to(receiver.socketId).emit("publicGroupUpdated", personalRoomData);
+     
+      }
+    });
 
 
   } catch (err) {
@@ -256,7 +270,7 @@ async function updatePrivateGroup(req, res) {
 
     const updatedRoom = room.toObject();
 
-    res.status(200).json({ success: true, updatedRoom }); 
+    res.status(200).json({ success: true }); 
 
     const { getIO, getOnlineReceivers } = require("../socket/socket");
     const io = getIO();

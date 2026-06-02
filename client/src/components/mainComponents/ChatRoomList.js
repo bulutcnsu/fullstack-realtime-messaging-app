@@ -75,7 +75,7 @@ const ChatRoomList = ({
   const toggleJoin = async (event, roomId) => {
     event.stopPropagation();
     await updatePublicRoom(roomId, username)
-      .then((data) => updateRoom(data))
+      .then((success) => console.log("update işlemi başarılı",success))
       .catch((err) => console.log("An error occured when updating room ", err));
   };
 
@@ -146,13 +146,12 @@ const ChatRoomList = ({
 
               {room.unreadCount > 0 &&  ( // show msg icon
 
-                <div style={{
+                <div style = {{
                   display: "flex",
                   alignItems: "center",
                   gap: "0.2rem", 
                   marginLeft: "1.5rem",
-                  alignSelf: "center"
-                }}>
+                  alignSelf: "center" }}>
 
                  <MsgIcon sx={{ color: "#5771cf", fontSize: "1.3rem" }} />
 
@@ -177,6 +176,9 @@ const ChatRoomList = ({
                   </div>
                 </div>
               )}
+
+
+           <>
               {visibile && (
                 <Button
                   size="small"
@@ -195,9 +197,14 @@ const ChatRoomList = ({
                   {room.joined ? "JOINED" : "JOIN"}{" "}
                 </Button>
               )}
+          </>
             </ListItem>
+                    
+        
 
-            <Divider variant="inset" component="li" />
+          
+    <Divider variant="inset" component="li" />
+
           </div>
         ))}
       </List>

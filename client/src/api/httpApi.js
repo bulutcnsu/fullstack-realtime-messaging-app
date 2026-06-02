@@ -172,8 +172,8 @@ export const updatePublicRoom = async (roomId, username) => {//updatePublic Room
       { username: username }
     );
 
-    console.log( "updating successfull", res.data.success ,res.data.updatedRoom)
-    return  res.data.updatedRoom;
+    console.log( "updating successfull", res.data.success )
+    return  res.data.success;
     
   } catch (err) {
     console.log("error update subscribed room",err);

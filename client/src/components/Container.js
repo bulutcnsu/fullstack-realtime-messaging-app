@@ -97,9 +97,9 @@ useEffect(() => {
 
      const room = data.room;
      const tempRoomId = data.tempRoomId;
-
+     const status = "MESSAGE"
       setRooms(prev =>
-        handleUpdatedRooms(prev, data, selectedRoomRef.current)
+        handleUpdatedRooms(prev, data, selectedRoomRef.current,status)
       );
 
       setMessages(prev =>
@@ -131,9 +131,9 @@ useEffect(() => {
     };
 
  const handlePrivateGroupUpdate = (room) => {
-  console.log("socketten gelen yakalanan yeni updated private room:", room);
+  const status = "PRIVATE_GROUP_UPDATE"
   setRooms(prev => 
-    handleUpdatedRooms(prev, room, selectedRoomRef.current) 
+    handleUpdatedRooms(prev, room, selectedRoomRef.current,status) 
   );
     if (selectedRoomRef.current && selectedRoomRef.current._id === room._id) {
        setSelectedRoom(room); 
@@ -143,16 +143,16 @@ useEffect(() => {
 };
 
   const handleAddNewGroupRoom = (room) => {
-  console.log("socketten gelen yakalanan yeni group room:", room);
+ const status ="ADD_GROUP_ROOM"
   setRooms(prev => 
-    handleUpdatedRooms(prev, room, selectedRoomRef.current) // ✅ Başına return eklendi (tek satır arrow function)
+    handleUpdatedRooms(prev, room, selectedRoomRef.current,status) // ✅ Başına return eklendi (tek satır arrow function)
   );
 };
 
  const handlePublicGroupUpdate =(room) =>{
- console.log("public room güncellemesi socket, container")
+  const status = "PUBLIC_GROUP_UPDATE"
   setRooms(prev => 
-    handlePublicGroupUpdate(prev, room, selectedRoomRef.current) 
+    handleUpdatedRooms(prev, room, selectedRoomRef.current,status) 
   );
  }
 
@@ -213,71 +213,71 @@ useEffect(() => {
     </div>
   );
 }
-export const handleUpdatedRooms = (prev, data, current) => {
+
+
+export const handleUpdatedRooms = (prev, data, current, status) => {
   const updated = { public: [...prev.public], private: [...prev.private] };
   
-   const room = data?._id ? data : data?.room;
+  let room = data?._id ? data : data?.room;
   if (!room) return prev;
 
- 
-   if (current?._id !== room._id) {
-   
-    if (room.joined === true || room.type === 'private') {
-   
-      const oldRoom = (updated[room.type] || []).find(r => r._id === room._id);
-   
-      const oldUnread = oldRoom ? (oldRoom.unreadCount || 0) : 0;
-     
-       room.unreadCount = oldUnread + 1;
-  
-  } else {
-    room.unreadCount = 0 }
- 
-  }else{ room.unreadCount = 0 }
-    
   const tempRoomId = data?.tempRoomId; 
-  const arr = updated[room.type] || [];
+  let arr = updated[room.type] || [];
+  const oldRoom = arr.find(r => r._id === room._id);
+  
 
- 
+  if (status === "MESSAGE") {
+  
+    if (current?._id !== room._id && (room.joined || room.type === 'private')) {
+      room.unreadCount = (oldRoom?.unreadCount || 0) + 1; 
+    } else {
+      room.unreadCount = 0;
+    }
+    
+     const filteredArr = arr.filter((r) => r._id !== room._id);
+    let newArr = [room, ...filteredArr];
+
+    return { ...updated, [room.type]: newArr };
+  }
+
+  //  SADECE GRUP JOIN/UNJOIN public room update
+  if (status === "PUBLIC_GROUP_UPDATE") { 
+    room.unreadCount = oldRoom?.unreadCount || 0; 
+
+    const filtered = arr.filter((r) => r._id !== room._id);
+    let newArr = [...filtered, room];
+    newArr.sort((a, b) => b.joined - a.joined);
+
+    return { ...updated, [room.type]: newArr };  
+  }
+
+
   if (tempRoomId) {
-
     const hasTempRoom = arr.some(r => r._id === tempRoomId);
     const hasRealRoom = arr.some(r => r._id === room._id);
 
     if (hasTempRoom || hasRealRoom) {
-      
       let filteredArr = arr.filter((r) => r._id !== tempRoomId && r._id !== room._id);
-  
       let newArr = [room, ...filteredArr];
-
-      console.log("Gönderici odası güncellendi ve en üste taşındı:", { ...updated, [room.type]: newArr });
       return { ...updated, [room.type]: newArr };
     }
   }
 
-    const index = arr.findIndex((r) => r._id === room._id);
+  const index = arr.findIndex((r) => r._id === room._id);
 
-  if (index > -1) {
+  if (index > -1) { 
     if (room.type === "public") {
       let filteredArr = arr.filter((r) => r._id !== room._id);
       filteredArr.unshift(room); 
       return { ...updated, [room.type]: filteredArr };
     } else {
-     
       const newArr = [...arr];
       newArr[index] = room;
-      
-      console.log("Private oda mevcut yerinde güncellendi");
       return { ...updated, [room.type]: newArr };
     }
-  }
-  
-  else {  
-  
+  } else {  
     let filteredArr = arr.filter((r) => r._id !== room._id);
     let newArr = [room, ...filteredArr];
-    
-    console.log("Yeni oda state'e eklendi:", { ...updated, [room.type]: newArr });
     return { ...updated, [room.type]: newArr };
   }
 };
@@ -287,7 +287,7 @@ export const handlePublicGroupUpdated = (prev, room) => {
   const updated = { public: [...prev.public], private: [...prev.private] }
   const newArr = [...updated[room.type]];
 
-  if (!room || room.type !== "public") return prev;
+/*  if (!room || room.type !== "public") return prev;
 
      const newRoom = { ...room }; 
       newRoom.unreadCount = 0;
@@ -301,7 +301,7 @@ export const handlePublicGroupUpdated = (prev, room) => {
       filteredArr.unshift(newRoom);
   }
 
-    return { ...updated, [room.type]: newArr };
+    return { ...updated, [room.type]: newArr };*/
 };
 export const handleUpdatedMessages = (prev, data) => {
   const msg = data.message;
@@ -311,6 +311,7 @@ export const handleUpdatedMessages = (prev, data) => {
   const messageWithStatus = data.status !== undefined ? { ...msg, status: data.status } : msg;
 
   console.log("New message came -->", messageWithStatus);
+  console.log("msg ye gelen room", room)
 
   const updated = { public: [...prev.public], private: [...prev.private] };
   const newArr = [...updated[room.type]];

@@ -26,13 +26,14 @@ const AddUserPage = ({ show, room }) => {
   const [color, setColor] = useState("");
 
   let query = null;
+  const username = localStorage.getItem('username');
 
   useEffect(() => {
     fetchAllUsers()
       .then((list) => {
         let newList = [...list];
         
-        // room.user_list null/undefined gelirse patlamasın diye ?. koyduk
+        // room.user_list null/undefined 
         room?.user_list?.forEach((user) => {
           newList = newList.filter((u) => user.userId !== u.id);
         });
@@ -85,11 +86,11 @@ const AddUserPage = ({ show, room }) => {
     e.preventDefault();
 
     const newList = checkedItems?.filter((el) => el.checkStatus === true);
-    console.log("checked newlist", newList);
+    
 
     if (newList.length > 0) {
       try {
-        const res = await updatePrivateGroup(newList, room); // http call
+        const res = await updatePrivateGroup(newList, room, username); // http call
         
         if (res && res.success) {
           setColor("green");

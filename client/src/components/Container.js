@@ -142,15 +142,16 @@ useEffect(() => {
 
 };
 
-  const handleAddNewGroupRoom = (room) => {
- const status ="ADD_GROUP_ROOM"
+ const handleAddNewGroupRoom = (room) => {
+ const status ="ADD_GROUP_ROOM";
   setRooms(prev => 
-    handleUpdatedRooms(prev, room, selectedRoomRef.current,status) // ✅ Başına return eklendi (tek satır arrow function)
+    handleUpdatedRooms(prev, room, selectedRoomRef.current,status) 
   );
 };
 
  const handlePublicGroupUpdate =(room) =>{
   const status = "PUBLIC_GROUP_UPDATE"
+  console.log("bana geln update room", room)
   setRooms(prev => 
     handleUpdatedRooms(prev, room, selectedRoomRef.current,status) 
   );
@@ -240,7 +241,7 @@ export const handleUpdatedRooms = (prev, data, current, status) => {
     return { ...updated, [room.type]: newArr };
   }
 
-  //  SADECE GRUP JOIN/UNJOIN public room update
+  
   if (status === "PUBLIC_GROUP_UPDATE") { 
     room.unreadCount = oldRoom?.unreadCount || 0; 
 

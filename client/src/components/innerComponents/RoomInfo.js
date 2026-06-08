@@ -22,7 +22,6 @@ const RoomInfo = ({ room, onBack, changeRoom, updatePrivateGroupList  }) => {
  const decoded = jwtDecode(token);
  const currentUserId = decoded.id;
   
-  console.log("RoomInfo selected room",room);
 
   const addUsertoGroup = () =>{
       setShowChild((prev) => !prev); 

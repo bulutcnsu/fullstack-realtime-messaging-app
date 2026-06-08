@@ -138,12 +138,12 @@ export const deleteItemList = async (itemType,list) =>{
   }
 };
 
-export const updatePrivateGroup = async(list,room) =>{ //update Private Group Room List
+export const updatePrivateGroup = async(list,room,username) =>{ //update Private Group Room List
  try {
     const res = await fetch("http://localhost:3000/api/room/updatePrivateGroup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ list: list, room: room })
+      body: JSON.stringify({ list: list, room: room, username: username })
     });
 
     if (!res.ok) {

@@ -62,7 +62,7 @@ function ChatForm({ selectedRoom,setSelectedRoom, rooms, setRooms }) {
                  
                  return { ...updated, [type]: arr };
 
-            } else {   return {...updated};  }}); // dont add the state
+            } else {   return {...updated};  }}); 
 
         
          setMessages(prev => { //check Room is in message Context ,if not create

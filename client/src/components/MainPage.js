@@ -9,25 +9,6 @@ const MainPage = ({ rooms, selectedRoom, setRooms, setSelectedRoom}) => {
   const [selectedRoomList, setSelectedRoomList] = useState([]);
  
 
-
- /* const handleUpdatePublicRoom = (room) => {  ///setPublic users with http response
-    if (room) {
-      const type = room.type; // 'public' veya 'private'
-     
-      setRooms((prevRooms) => {
-        const list = prevRooms[type];
-        const filtered = list.filter((r) => r._id !== room._id);
-
-        const updated = [...filtered, room];
-        updated.sort((a, b) => b.joined - a.joined);
-
-        return {
-          ...prevRooms,
-          [type]: updated,
-        };
-      });
-    }
-  };*/
   return (
     <>
       <MainNavbar

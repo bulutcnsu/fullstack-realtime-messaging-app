@@ -5,7 +5,7 @@ import { handleUpdatedMessages } from "../Container";
 import { sendMessage } from "../../api/socketApi"
 import { useChat } from "../../context/ChatContext";
 
-function ChatForm({ selectedRoom,setSelectedRoom, rooms, setRooms }) {
+function ChatForm({ selectedRoom, setSelectedRoom, rooms, setRooms }) {
 
     const [text, setText] = useState("");
     const { setMessages } = useChat();
@@ -25,79 +25,81 @@ function ChatForm({ selectedRoom,setSelectedRoom, rooms, setRooms }) {
             _id: "temp-" + Date.now(),
             content: text,
             sender: token,
-            roomId:  selectedRoom._id, //group has name, but private has not ,*username
-            senderName: username, 
+            roomId: selectedRoom._id, //group has name, but private has not ,*username
+            senderName: username,
             createdAt: currentTime,
             status: "sending"
         };
-     
- 
+
+
         // status: "sending" | "sent" | "error"
-        setContexes(newMsg,selectedRoom); //completed 
+        setContexes(newMsg, selectedRoom); //completed 
 
         setText("");
     }
 
-    const setContexes = (newMsg,selectedRoom) => {  //find selectedRoom
-     const type ="private";
-      let tempRoom = selectedRoom;     
+    const setContexes = (newMsg, selectedRoom) => {  //find selectedRoom
+        const type = "private";
+        let tempRoom = selectedRoom;
 
 
-           setRooms(prev => {
-                const updated = { public: [...prev.public], private: [...prev.private] };
-                 let arr = [updated.private];
+        setRooms(prev => {
+            const updated = { public: [...prev.public], private: [...prev.private] };
+            let arr = [updated.private];
 
-            if (!tempRoom.hasOwnProperty('type')) { 
-                    
-               tempRoom = {
-               _id: "temp-" + selectedRoom._id,
-                roomKind :"direct",
-                type: "private",
-                user_list: [selectedRoom], //will update at backend
-                room_name : selectedRoom.username}
+            if (!tempRoom.hasOwnProperty('type')) {
+
+                tempRoom = {
+                    _id: "temp-" + selectedRoom._id,
+                    roomKind: "direct",
+                    type: "private",
+                    user_list: [selectedRoom], //will update at backend
+                    room_name: selectedRoom.username
+                }
 
                 arr = [tempRoom, ...updated.private]; //if there is not room has type property then add the state
-               
-                 console.log(`ChatForm  updated ${type} room array :`  , arr)
-                 
-                 return { ...updated, [type]: arr };
 
-            } else {   return {...updated};  }}); 
+                console.log(`ChatForm  updated ${type} room array :`, arr)
 
-        
-         setMessages(prev => { //check Room is in message Context ,if not create
-                const updated = { public: [...prev.public], private: [...prev.private] };
-                let arr = [...updated.private];
+                return { ...updated, [type]: arr };
 
-          
-                const index =  arr.findIndex((r) => r.roomId === tempRoom._id);
-                console.log("MSG Room da bulunan index",index)
+            } else { return { ...updated }; }
+        });
 
-                let newRoom = null;
-              
-                if(index< 0){
-              
-                    newRoom = {
+
+        setMessages(prev => { //check Room is in message Context ,if not create
+            const updated = { public: [...prev.public], private: [...prev.private] };
+            let arr = [...updated.private];
+
+
+            const index = arr.findIndex((r) => r.roomId === tempRoom._id);
+            let newRoom = null;
+
+            if (index < 0) {
+
+                newRoom = {
                     roomId: tempRoom._id,
                     messages: [],
-                   };
+                };
 
-                  const msg = { ...newMsg , roomId: tempRoom._id}
-                         
-                  newRoom.messages.push(msg); 
-                  arr = [newRoom, ...updated.private]; }
-              
-               else{ arr[index].messages.push(newMsg)}
-                                
-                 console.log(`ChatForm  updated ${type} msg array :`  , arr)
-                return { ...updated, [type]: arr};
+                const msg = { ...newMsg, roomId: tempRoom._id }
 
-            }) 
-        
-         sendMessage(newMsg,username,tempRoom);    
-        
-         setSelectedRoom(tempRoom);}
-            
+                newRoom.messages.push(msg);
+                arr = [newRoom, ...updated.private];
+            }
+
+            else { arr[index].messages.push(newMsg) }
+
+            console.log(`ChatForm  updated ${type} msg array :`, arr)
+            return { ...updated, [type]: arr };
+
+        })
+
+        sendMessage(newMsg, username, tempRoom);
+
+        setSelectedRoom(tempRoom);
+    }
+
 
     return (
 

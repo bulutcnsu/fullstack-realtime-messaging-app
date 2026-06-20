@@ -24,31 +24,31 @@ function Container() {
   const selectedRoomRef = useRef(null);
 
 
-useEffect(() => {
+  useEffect(() => {
 
-  selectedRoomRef.current = selectedRoom;
+    selectedRoomRef.current = selectedRoom;
 
 
-  if (selectedRoom && selectedRoom.type) {
-    const type = selectedRoom.type; 
+    if (selectedRoom && selectedRoom.type) {
+      const type = selectedRoom.type;
 
-    setRooms((prev) => {
-    
-      
-      const updatedList = prev[type].map((room) => {
-        if (room._id === selectedRoom._id || room === selectedRoom) {
-          return { ...room, unreadCount: 0 };
-        }
-        return room;
+      setRooms((prev) => {
+
+
+        const updatedList = prev[type].map((room) => {
+          if (room._id === selectedRoom._id || room === selectedRoom) {
+            return { ...room, unreadCount: 0 };
+          }
+          return room;
+        });
+
+        return {
+          ...prev,
+          [type]: updatedList,
+        };
       });
-
-      return {
-        ...prev,
-        [type]: updatedList,
-      };
-    });
-  }
-}, [selectedRoom]);
+    }
+  }, [selectedRoom]);
 
   useEffect(() => {
 
@@ -91,31 +91,31 @@ useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
 
-   
+
 
     const handleNewMessage = (data) => {
 
-     const room = data.room;
-     const tempRoomId = data.tempRoomId;
-     const status = "MESSAGE"
+      const room = data.room;
+      const tempRoomId = data.tempRoomId;
+      const status = "MESSAGE"
       setRooms(prev =>
-        handleUpdatedRooms(prev, data, selectedRoomRef.current,status)
+        handleUpdatedRooms(prev, data, selectedRoomRef.current, status)
       );
 
       setMessages(prev =>
         handleUpdatedMessages(prev, data)
       );
-    
-     setSelectedRoom(prev => {
-    if (prev?._id === tempRoomId || prev?._id === room._id) {
-        return { 
-      ...room, 
-       unreadCount: 0 
-    };
-    }
-    return prev;
-  });
-  
+
+      setSelectedRoom(prev => {
+        if (prev?._id === tempRoomId || prev?._id === room._id) {
+          return {
+            ...room,
+            unreadCount: 0
+          };
+        }
+        return prev;
+      });
+
     };
 
     const handleDeletedItem = (item, type, list) => {
@@ -130,54 +130,54 @@ useEffect(() => {
       );
     };
 
- const handlePrivateGroupUpdate = (room) => {
-  const status = "PRIVATE_GROUP_UPDATE"
-  setRooms(prev => 
-    handleUpdatedRooms(prev, room, selectedRoomRef.current,status) 
-  );
-    if (selectedRoomRef.current && selectedRoomRef.current._id === room._id) {
-       setSelectedRoom(room); 
-      selectedRoomRef.current = room; 
-  }
+    const handlePrivateGroupUpdate = (room) => {
+      const status = "PRIVATE_GROUP_UPDATE"
+      setRooms(prev =>
+        handleUpdatedRooms(prev, room, selectedRoomRef.current, status)
+      );
+      if (selectedRoomRef.current && selectedRoomRef.current._id === room._id) {
+        setSelectedRoom(room);
+        selectedRoomRef.current = room;
+      }
 
-};
+    };
 
- const handleAddNewGroupRoom = (room) => {
- const status ="ADD_GROUP_ROOM";
-  setRooms(prev => 
-    handleUpdatedRooms(prev, room, selectedRoomRef.current,status) 
-  );
-};
+    const handleAddNewGroupRoom = (room) => {
+      const status = "ADD_GROUP_ROOM";
 
- const handlePublicGroupUpdate =(room) =>{
-  const status = "PUBLIC_GROUP_UPDATE"
-  console.log("bana geln update room", room)
-  setRooms(prev => 
-    handleUpdatedRooms(prev, room, selectedRoomRef.current,status) 
-  );
- }
+      setRooms(prev =>
+        handleUpdatedRooms(prev, room, selectedRoomRef.current, status)
+      );
+    };
+
+    const handlePublicGroupUpdate = (room) => {
+      const status = "PUBLIC_GROUP_UPDATE"
+      setRooms(prev =>
+        handleUpdatedRooms(prev, room, selectedRoomRef.current, status)
+      );
+    }
 
 
     socket.on("dbNewMessage", handleNewMessage);
     socket.on("itemDeleted", handleDeletedItem);
     socket.on("privateGroupUpdated", handlePrivateGroupUpdate);
-    socket.on("newGroupRoom",handleAddNewGroupRoom );
-    socket.on("publicGroupUpdated",handlePublicGroupUpdate);
-    
+    socket.on("newGroupRoom", handleAddNewGroupRoom);
+    socket.on("publicGroupUpdated", handlePublicGroupUpdate);
+
 
 
     return () => {
       socket.off("dbNewMessage", handleNewMessage);
       socket.off("itemDeleted", handleDeletedItem);
       socket.off("privateGroupUpdated", handlePrivateGroupUpdate);
-      socket.off("newGroupRoom",handleAddNewGroupRoom )
-      socket.off("publicGroupUpdated",handlePublicGroupUpdate);
+      socket.off("newGroupRoom", handleAddNewGroupRoom)
+      socket.off("publicGroupUpdated", handlePublicGroupUpdate);
     };
 
   }, [isAuth]);
 
 
-  console.log("isAuth baslangıc degeri:", isAuth);
+  console.log("isAuth initial value:", isAuth);
   console.log("current selected room is : ", selectedRoom)
 
   return (
@@ -218,38 +218,38 @@ useEffect(() => {
 
 export const handleUpdatedRooms = (prev, data, current, status) => {
   const updated = { public: [...prev.public], private: [...prev.private] };
-  
+
   let room = data?._id ? data : data?.room;
   if (!room) return prev;
 
-  const tempRoomId = data?.tempRoomId; 
+  const tempRoomId = data?.tempRoomId;
   let arr = updated[room.type] || [];
   const oldRoom = arr.find(r => r._id === room._id);
-  
+
 
   if (status === "MESSAGE") {
-  
+
     if (current?._id !== room._id && (room.joined || room.type === 'private')) {
-      room.unreadCount = (oldRoom?.unreadCount || 0) + 1; 
+      room.unreadCount = (oldRoom?.unreadCount || 0) + 1;
     } else {
       room.unreadCount = 0;
     }
-    
-     const filteredArr = arr.filter((r) => r._id !== room._id);
+
+    const filteredArr = arr.filter((r) => r._id !== room._id);
     let newArr = [room, ...filteredArr];
 
     return { ...updated, [room.type]: newArr };
   }
 
-  
-  if (status === "PUBLIC_GROUP_UPDATE") { 
-    room.unreadCount = oldRoom?.unreadCount || 0; 
+
+  if (status === "PUBLIC_GROUP_UPDATE") {
+    room.unreadCount = oldRoom?.unreadCount || 0;
 
     const filtered = arr.filter((r) => r._id !== room._id);
     let newArr = [...filtered, room];
     newArr.sort((a, b) => b.joined - a.joined);
 
-    return { ...updated, [room.type]: newArr };  
+    return { ...updated, [room.type]: newArr };
   }
 
 
@@ -266,17 +266,17 @@ export const handleUpdatedRooms = (prev, data, current, status) => {
 
   const index = arr.findIndex((r) => r._id === room._id);
 
-  if (index > -1) { 
+  if (index > -1) {
     if (room.type === "public") {
       let filteredArr = arr.filter((r) => r._id !== room._id);
-      filteredArr.unshift(room); 
+      filteredArr.unshift(room);
       return { ...updated, [room.type]: filteredArr };
     } else {
       const newArr = [...arr];
       newArr[index] = room;
       return { ...updated, [room.type]: newArr };
     }
-  } else {  
+  } else {
     let filteredArr = arr.filter((r) => r._id !== room._id);
     let newArr = [room, ...filteredArr];
     return { ...updated, [room.type]: newArr };
@@ -284,25 +284,25 @@ export const handleUpdatedRooms = (prev, data, current, status) => {
 };
 
 export const handlePublicGroupUpdated = (prev, room) => {
-  
+
   const updated = { public: [...prev.public], private: [...prev.private] }
   const newArr = [...updated[room.type]];
 
-/*  if (!room || room.type !== "public") return prev;
-
-     const newRoom = { ...room }; 
-      newRoom.unreadCount = 0;
-
-
-  let filteredArr = newArr.filter((r) => r._id !== newRoom._id);
-
-  if (newRoom.joined === false) {
-      filteredArr.push(newRoom);
-  } else {
-      filteredArr.unshift(newRoom);
-  }
-
-    return { ...updated, [room.type]: newArr };*/
+  /*  if (!room || room.type !== "public") return prev;
+  
+       const newRoom = { ...room }; 
+        newRoom.unreadCount = 0;
+  
+  
+    let filteredArr = newArr.filter((r) => r._id !== newRoom._id);
+  
+    if (newRoom.joined === false) {
+        filteredArr.push(newRoom);
+    } else {
+        filteredArr.unshift(newRoom);
+    }
+  
+      return { ...updated, [room.type]: newArr };*/
 };
 export const handleUpdatedMessages = (prev, data) => {
   const msg = data.message;
@@ -312,42 +312,41 @@ export const handleUpdatedMessages = (prev, data) => {
   const messageWithStatus = data.status !== undefined ? { ...msg, status: data.status } : msg;
 
   console.log("New message came -->", messageWithStatus);
-  console.log("msg ye gelen room", room)
 
   const updated = { public: [...prev.public], private: [...prev.private] };
   const newArr = [...updated[room.type]];
-  
- 
+
+
   const index = newArr.findIndex((r) => r.roomId === tempRoomId || r.roomId === room._id);
 
-  if (index > -1) { 
+  if (index > -1) {
     const arr = newArr.map((r, id) => {
-     
+
       if (id !== index) return r;
 
-      
+
       const tempMsgExists = r.messages.some(m => m._id === tempMsgId);
       const realMsgExists = r.messages.some(m => m._id === messageWithStatus._id);
 
       let updatedMessages;
 
-      if (tempMsgId && tempMsgExists) { 
-      
+      if (tempMsgId && tempMsgExists) {
+
         updatedMessages = r.messages.map(m =>
           m._id === tempMsgId ? messageWithStatus : m
         );
       } else if (realMsgExists) {
-        
+
         updatedMessages = r.messages;
       } else {
-        
+
         updatedMessages = [...r.messages, messageWithStatus];
       }
 
-     
+
       return {
         ...r,
-        roomId: room._id, 
+        roomId: room._id,
         messages: updatedMessages
       };
     });
@@ -355,8 +354,8 @@ export const handleUpdatedMessages = (prev, data) => {
     console.log("Container updated messages ", { ...updated, [room.type]: arr });
     return { ...updated, [room.type]: arr };
 
-  } else { 
- 
+  } else {
+
     const newRoom = { roomId: room._id, messages: [messageWithStatus] };
     const arr = [newRoom, ...newArr];
 
@@ -397,7 +396,7 @@ export const handleDeleteMessageList = (prev, type, list) => {
   }
 
   console.log("updated messages after deletion ", { ...updated, [type]: newArr });
-  return { ...updated, [type]: newArr }; //"Eğer bu oda artık oda listemde yoksa, mesaj state'inde de yeri yok, komple geçmişini temizle
+  return { ...updated, [type]: newArr };
 };
 
 export default Container;

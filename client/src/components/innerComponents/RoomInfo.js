@@ -9,22 +9,22 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import Avatar from "./AvatarPage";
 import AddUserPage from "./AddUserPage";
 import { jwtDecode } from "jwt-decode";
-import { useState} from "react";
+import { useState } from "react";
 import { updatePrivateGroupRoom } from "../../api/httpApi";
 
-const RoomInfo = ({ room, onBack, changeRoom, updatePrivateGroupList  }) => {
- 
+const RoomInfo = ({ room, onBack, changeRoom, updatePrivateGroupList }) => {
+
   const [showChild, setShowChild] = useState(false);
-  const visibilty = room.type === "private"  && room.room_name !== null  ? "visible" : "hidden";
+  const visibilty = room.type === "private" && room.room_name !== null ? "visible" : "hidden";
 
- const currentUsername = localStorage.getItem("username");
- const token = localStorage.getItem("token");
- const decoded = jwtDecode(token);
- const currentUserId = decoded.id;
-  
+  const currentUsername = localStorage.getItem("username");
+  const token = localStorage.getItem("token");
+  const decoded = jwtDecode(token);
+  const currentUserId = decoded.id;
 
-  const addUsertoGroup = () =>{
-      setShowChild((prev) => !prev); 
+
+  const addUsertoGroup = () => {
+    setShowChild((prev) => !prev);
   }
 
   return (
@@ -50,12 +50,12 @@ const RoomInfo = ({ room, onBack, changeRoom, updatePrivateGroupList  }) => {
             </Typography>
 
 
-            <Tooltip sx={{visibility : visibilty}}>
+            <Tooltip sx={{ visibility: visibilty }}>
               <IconButton>
                 <PersonAddIcon
                   variant="rounded"
                   sx={{ fontSize: 30, color: "#ffffff" }}
-                  onClick ={() => addUsertoGroup()}
+                  onClick={() => addUsertoGroup()}
                 />
               </IconButton>
             </Tooltip>
@@ -65,13 +65,13 @@ const RoomInfo = ({ room, onBack, changeRoom, updatePrivateGroupList  }) => {
 
         {room !== null &&
           room.hasOwnProperty("room_name") &&
-          room.room_name !== null && ( 
+          room.room_name !== null && (
             <div key={room._id}>
               {room.user_list.map(
                 (
                   user
                 ) => (
-                  <AppBar 
+                  <AppBar
                     position="static"
                     sx={{
                       bgcolor: "#cfd4d8eb",
@@ -103,8 +103,8 @@ const RoomInfo = ({ room, onBack, changeRoom, updatePrivateGroupList  }) => {
           )}
       </Box>
 
-           
-          {showChild && <AddUserPage show={setShowChild}  room={room}  updatePrivateGroupList ={updatePrivateGroupList}/>}
+
+      {showChild && <AddUserPage show={setShowChild} room={room} updatePrivateGroupList={updatePrivateGroupList} />}
     </>
   );
 };

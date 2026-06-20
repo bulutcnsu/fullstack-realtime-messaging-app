@@ -15,7 +15,7 @@ import ListItem from "@mui/material/ListItem";
 import Checkbox from "@mui/material/Checkbox";
 import { useEffect, useState } from "react";
 import { fetchAllUsers } from "../../api/httpApi";
-import { updatePrivateGroup} from "../../api/httpApi";
+import { updatePrivateGroup } from "../../api/httpApi";
 
 const AddUserPage = ({ show, room }) => {
   const [checkedItems, setCheckedItems] = useState([]);
@@ -32,7 +32,7 @@ const AddUserPage = ({ show, room }) => {
     fetchAllUsers()
       .then((list) => {
         let newList = [...list];
-        
+
         // room.user_list null/undefined 
         room?.user_list?.forEach((user) => {
           newList = newList.filter((u) => user.userId !== u.id);
@@ -68,7 +68,7 @@ const AddUserPage = ({ show, room }) => {
   const handleSearch = () => {
     if (entry !== null) {
       query = users.filter((user) => user.username.includes(entry.trim()));
-  
+
 
       if (query) {
         setUserList(query);
@@ -86,18 +86,18 @@ const AddUserPage = ({ show, room }) => {
     e.preventDefault();
 
     const newList = checkedItems?.filter((el) => el.checkStatus === true);
-    
+
 
     if (newList.length > 0) {
       try {
         const res = await updatePrivateGroup(newList, room, username); // http call
-        
+
         if (res && res.success) {
           setColor("green");
           setText("Changes have been saved");
 
-            setTimeout(() => {
-            show(false); 
+          setTimeout(() => {
+            show(false);
           }, 1500);
 
         } else {

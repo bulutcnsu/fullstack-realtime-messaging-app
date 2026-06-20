@@ -1,11 +1,11 @@
 import axios from "axios";
 
 export const loadRooms = async (username, callback) => {
-  const [publicRooms, privateRooms]  = await Promise.all([
+  const [publicRooms, privateRooms] = await Promise.all([
     fetchPublicRooms(username),
     fetchPrivateRooms(username),
   ]);
-  console.log("http dönen roooms",[publicRooms, privateRooms]  );
+  console.log("http returned rooms", [publicRooms, privateRooms]);
   callback({
     public: publicRooms,
     private: privateRooms
@@ -19,19 +19,19 @@ export const loadMessages = async (username, callback) => {
 
   normalizeMessages(publicMessagesFromHttp, messages.public);
   normalizeMessages(privateMessagesFromHttp, messages.private);
-  console.log("http dönen mesajlar",messages);
+  console.log("http returned messages", messages);
   callback(messages);
 };
 
-export const createNewRoom = async (room) =>{
-   try {
-      const res = await fetch("http://localhost:3000/api/room/newGroup", {
+export const createNewRoom = async (room) => {
+  try {
+    const res = await fetch("http://localhost:3000/api/room/newGroup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(room),
     })
-     const data = await res.json();
-     return data;
+    const data = await res.json();
+    return data;
 
   } catch (err) {
     console.log("error public message call", err);
@@ -41,9 +41,9 @@ export const createNewRoom = async (room) =>{
 
 const normalizeMessages = (messagesFromHttp, targetArray) => {
   for (let msg of messagesFromHttp) {
-    
+
     let room = targetArray.find((r) => r.roomId === msg.roomId);
-    msg.status ='sent';
+    msg.status = 'sent';
 
     if (!room) {
 
@@ -59,9 +59,9 @@ const normalizeMessages = (messagesFromHttp, targetArray) => {
 
 const fetchPublicMessages = async (username) => {
   try {
-    const url = "http://localhost:3000/api/messages/public/"+ username;
+    const url = "http://localhost:3000/api/messages/public/" + username;
     const res = await axios.get(url);
-    
+
     return res.data.messages;
   } catch (err) {
     console.log("error public message call", err);
@@ -94,7 +94,7 @@ const fetchPublicRooms = async (username) => {
   try {
     const url = "http://localhost:3000/api/room/publicRooms/" + username;
     const res = await axios.get(url);
-   
+
     return res.data.rooms;
   } catch (err) {
     console.log("error private room call", err);
@@ -102,11 +102,11 @@ const fetchPublicRooms = async (username) => {
   }
 };
 
-export const fetchAllUsers = async() =>{
-    try {
+export const fetchAllUsers = async () => {
+  try {
     const url = "http://localhost:3000/api/user/allusers/";
     const res = await axios.get(url);
-   
+
     return res.data.list;
   } catch (err) {
     console.log("error private room call", err);
@@ -114,23 +114,23 @@ export const fetchAllUsers = async() =>{
   }
 }
 
-export const deleteItemList = async (itemType,list) =>{
+export const deleteItemList = async (itemType, list) => {
 
   const url = list[0].roomId ? "messages/deleteMessage" : "room/deleteRoom"
 
   try {
-      const res = await fetch("http://localhost:3000/api/"+ url, {
+    const res = await fetch("http://localhost:3000/api/" + url, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-      list: list, 
-      itemType: itemType 
-    })
- });
+      body: JSON.stringify({
+        list: list,
+        itemType: itemType
+      })
+    });
 
-      const data = await res.json();
-      console.log("Delete  Operation is succesfull")
-      return  data.success;
+    const data = await res.json();
+    console.log("Delete  Operation is succesfull")
+    return data.success;
 
   } catch (err) {
     console.log("An error ocuured delete items", err);
@@ -138,8 +138,8 @@ export const deleteItemList = async (itemType,list) =>{
   }
 };
 
-export const updatePrivateGroup = async(list,room,username) =>{ //update Private Group Room List
- try {
+export const updatePrivateGroup = async (list, room, username) => { //update Private Group Room List
+  try {
     const res = await fetch("http://localhost:3000/api/room/updatePrivateGroup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -147,10 +147,10 @@ export const updatePrivateGroup = async(list,room,username) =>{ //update Private
     });
 
     if (!res.ok) {
-      const errorData = await res.json().catch(() => ({})); 
-      return { 
-        success: false, 
-        message: errorData.message || `Server error: ${res.status}` 
+      const errorData = await res.json().catch(() => ({}));
+      return {
+        success: false,
+        message: errorData.message || `Server error: ${res.status}`
       };
     }
 
@@ -172,11 +172,11 @@ export const updatePublicRoom = async (roomId, username) => {//updatePublic Room
       { username: username }
     );
 
-    console.log( "updating successfull", res.data.success )
-    return  res.data.success;
-    
+    console.log("updating successfull", res.data.success)
+    return res.data.success;
+
   } catch (err) {
-    console.log("error update subscribed room",err);
+    console.log("error update subscribed room", err);
     return err;
   }
 };

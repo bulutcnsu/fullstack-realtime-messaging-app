@@ -5,7 +5,7 @@ let socket = null;
 
 export const init = (token) => {
 
-    if (socket) {
+  if (socket) {
 
     if (!socket.connected) {
       console.log("♻️ reconnecting socket...");
@@ -39,7 +39,7 @@ export const init = (token) => {
       localStorage.removeItem("token");
       localStorage.removeItem("username");
 
-  //    window.dispatchEvent(new Event("forceLogout"));
+      //    window.dispatchEvent(new Event("forceLogout"));
     }
   });
 
@@ -58,39 +58,39 @@ export const disconnectSocket = () => {
   console.log("🛑 Socket destroyed");
 };
 
-export const sendMessage = (message, username,room) => { //completed
+export const sendMessage = (message, username, room) => { //completed
 
 
-   if (!socket) return;
-    socket.emit("newMessage", message, username,room);
-    console.log("📨 sending message");
+  if (!socket) return;
+  socket.emit("newMessage", message, username, room);
+  console.log("📨 sending message");
 };
 
-export const getNewGroupRoom =(callback) =>{  //socketUpdate//
- if (!socket) return;  
-   
-      socket.on("newGroupRoom", (savedRoom) => {
-      console.log("🔥Backend send new Group:", savedRoom);
-      callback(savedRoom);
-    });
+export const getNewGroupRoom = (callback) => {  //socketUpdate//
+  if (!socket) return;
+
+  socket.on("newGroupRoom", (savedRoom) => {
+    console.log("🔥Backend send new Group:", savedRoom);
+    callback(savedRoom);
+  });
 }
 
-export const publicGroupUpdated = (callback) =>{//completed
-if (!socket) return;
+export const publicGroupUpdated = (callback) => {//completed
+  if (!socket) return;
 
-     socket.on("publicGroupUpdated", (room) => {
-      console.log("Updated public room", room);
-      callback(room);
-    });
+  socket.on("publicGroupUpdated", (room) => {
+    console.log("Updated public room", room);
+    callback(room);
+  });
 
 }
 
-export const privateGroupUpdated = (callback) =>{//completed
-if (!socket) return;
-   
- socket.on("privateGroupUpdated", (room) => {
-      console.log("Updated private room", room);
-      callback(room); // added callback here
-    });
+export const privateGroupUpdated = (callback) => {//completed
+  if (!socket) return;
+
+  socket.on("privateGroupUpdated", (room) => {
+    console.log("Updated private room", room);
+    callback(room); // added callback here
+  });
 
 }

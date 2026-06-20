@@ -25,7 +25,7 @@ function initSocket(io) {
     const currentUserIdStr = socket.userId.toString();
     onlineUsers.set(currentUserIdStr, socket.id);
 
-    console.log("Bağlanan kullanıcı:", socket.userId);
+    console.log("Connected UserId is :", socket.userId);
 
 
     socket.on("joinRoom", (roomId) => {
@@ -33,7 +33,7 @@ function initSocket(io) {
     });
 
     socket.on("newMessage", async (message, username, roomObj) => {
-      console.log("Fronttan gelen mesaj:", message);
+      console.log("Message is came from FrontSide:", message);
       const sender = { userId: socket.userId, username: username };
 
       try {
@@ -59,8 +59,6 @@ function initSocket(io) {
 
 
           activeReceivers = activeReceivers.filter(user => user.userId.toString() !== currentUserIdStr);
-          console.log("bana gelen activeReceivers", activeReceivers);
-
           activeReceivers.forEach((receiver) => {
             if (receiver.socketId) {
               let room = _room.toObject ? _room.toObject() : { ..._room };
@@ -75,7 +73,7 @@ function initSocket(io) {
           });
         }
       } catch (err) {
-        console.log("Socket hatası:", err);
+        console.log("Socket Error:", err);
       }
     });
 
@@ -95,7 +93,7 @@ function getOnlineReceivers(room, user) {
 
   if (!room || !room.user_list) return [];
 
-  const receiverList = room.user_list?.filter((u) => u.userId !== (user.userId || user._id));
+  const receiverList = room.user_list?.filter((u) => String(u.userId) !== String((user.userId || user._id)));
 
   return receiverList.map(user => {
     const _user = user;
@@ -103,29 +101,31 @@ function getOnlineReceivers(room, user) {
     const userIdStr = userIdObj ? userIdObj.toString() : "";
 
     return {
-      userId: userIdStr,
-      username: _user.username,
-      socketId: userIdStr ? onlineUsers.get(userIdStr) || null : null
+      userId: userIdObj,
+      socketId: onlineUsers.get(userIdStr) || null
     };
   });
 }
 
 function getAllUsers() {
- 
-  if(!onlineUsers) return [];
+
+  if (!onlineUsers) return [];
 
   return [...onlineUsers.values()];
 
 }
 
-function getOnlineUser(user) {
+function getSender(user) {
   if (!user) return null;
 
   const _user = user;
   const userIdObj = _user.userId || _user._id;
   const userIdStr = userIdObj ? userIdObj.toString() : "";
 
-  return onlineUsers.get(userIdStr);
+  return {
+    userId: userIdObj,
+    socketId: onlineUsers.get(userIdStr)
+  };
 
 }
 function getIO() {
@@ -135,4 +135,4 @@ function getIO() {
 
 
 
-module.exports = { initSocket, getIO, getOnlineUser, getAllUsers, getOnlineReceivers };
+module.exports = { initSocket, getIO, getSender, getAllUsers, getOnlineReceivers };

@@ -21,7 +21,7 @@ const connectDB = ()  => {
 
   try{
     mongoose.connect(uri)
-    .then(() => console.log("✅ MongoDB Atlas Connection is successfuyll!"))
+    .then(() => console.log("✅ MongoDB Atlas Connection is successfully!"))
     .catch((err) => {
       console.log("❌ MongoDB Connection Error:");
       console.error(err);

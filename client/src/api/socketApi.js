@@ -3,6 +3,8 @@ import { io } from "socket.io-client";
 
 let socket = null;
 
+const URL = "https://realtime-chatapp-backend-ybmv.onrender.com";
+
 export const init = (token) => {
 
   if (socket) {
@@ -15,7 +17,7 @@ export const init = (token) => {
     return socket;
   }
 
-  socket = io("http://localhost:3000", {
+  socket = io(URL, {
     auth: { token },
   });
 

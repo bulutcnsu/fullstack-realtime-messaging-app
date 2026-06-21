@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const URL ="https://realtime-chatapp-backend-ybmv.onrender.com";
+
 export const loadRooms = async (username, callback) => {
   const [publicRooms, privateRooms] = await Promise.all([
     fetchPublicRooms(username),
@@ -25,7 +27,7 @@ export const loadMessages = async (username, callback) => {
 
 export const createNewRoom = async (room) => {
   try {
-    const res = await fetch("http://localhost:3000/api/room/newGroup", {
+    const res = await fetch(URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(room),
@@ -59,7 +61,7 @@ const normalizeMessages = (messagesFromHttp, targetArray) => {
 
 const fetchPublicMessages = async (username) => {
   try {
-    const url = "http://localhost:3000/api/messages/public/" + username;
+    const url = URL + username;
     const res = await axios.get(url);
 
     return res.data.messages;
@@ -71,7 +73,7 @@ const fetchPublicMessages = async (username) => {
 
 const fetchPrivateMessages = async (username) => {
   try {
-    const url = "http://localhost:3000/api/messages/private/" + username;
+    const url = URL + username;
     const res = await axios.get(url);
     return res.data.messages;
   } catch (err) {
@@ -81,7 +83,7 @@ const fetchPrivateMessages = async (username) => {
 };
 const fetchPrivateRooms = async (username) => {
   try {
-    const url = "http://localhost:3000/api/room/privateRooms/" + username;
+    const url = URL + username;
     const res = await axios.get(url);
     return res.data.rooms;
   } catch (err) {
@@ -92,7 +94,7 @@ const fetchPrivateRooms = async (username) => {
 
 const fetchPublicRooms = async (username) => {
   try {
-    const url = "http://localhost:3000/api/room/publicRooms/" + username;
+    const url = URL + username;
     const res = await axios.get(url);
 
     return res.data.rooms;
@@ -104,7 +106,7 @@ const fetchPublicRooms = async (username) => {
 
 export const fetchAllUsers = async () => {
   try {
-    const url = "http://localhost:3000/api/user/allusers/";
+    const url = URL;
     const res = await axios.get(url);
 
     return res.data.list;
@@ -119,7 +121,7 @@ export const deleteItemList = async (itemType, list) => {
   const url = list[0].roomId ? "messages/deleteMessage" : "room/deleteRoom"
 
   try {
-    const res = await fetch("http://localhost:3000/api/" + url, {
+    const res = await fetch(URL + url, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -140,7 +142,7 @@ export const deleteItemList = async (itemType, list) => {
 
 export const updatePrivateGroup = async (list, room, username) => { //update Private Group Room List
   try {
-    const res = await fetch("http://localhost:3000/api/room/updatePrivateGroup", {
+    const res = await fetch(URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ list: list, room: room, username: username })
@@ -168,7 +170,7 @@ export const updatePrivateGroup = async (list, room, username) => { //update Pri
 export const updatePublicRoom = async (roomId, username) => {//updatePublic Room
   try {
     const res = await axios.patch(
-      `http://localhost:3000/api/room/publicRooms/subscribe/` + roomId,
+      URL + roomId,
       { username: username }
     );
 

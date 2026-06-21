@@ -24,9 +24,9 @@ const socketAuth = (socket, next) => {
           console.log("New Error",err)
          
           if(err.name ==="TokenExpiredError"){
-            return next(new Error("🔥jwt expired🔥"));
+            return next(new Error("jwt expired"));
           }
-          return next(new Error(" 🔥Unauthorized🔥"));  }
+          return next(new Error(" Unauthorized"));  }
       };
 
 module.exports = {socketAuth};

@@ -19,7 +19,8 @@ const AuthForm = ({ onAuthSuccess }) => { //onSelect ,getName,getToken
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [color, setColor] = useState("");
-
+ 
+  const URL ="https://realtime-chatapp-backend-ybmv.onrender.com"; 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -45,7 +46,7 @@ const AuthForm = ({ onAuthSuccess }) => { //onSelect ,getName,getToken
 
     if (name && password) {
 
-      const res = await fetch("http://localhost:3000/api/auth/signup", {
+      const res = await fetch(URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: name.trim(), password: password }),
@@ -75,7 +76,7 @@ const AuthForm = ({ onAuthSuccess }) => { //onSelect ,getName,getToken
 
   const handleLogin = async () => {
 
-    const res = await fetch("http://localhost:3000/api/auth/login", {
+    const res = await fetch(URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: name.trim(), password: password }),

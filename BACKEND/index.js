@@ -21,11 +21,11 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); 
 
 
-const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:3000";
+const allowedOrigin = process.env.FRONTEND_URL || "https://6a380e051b56a3dc661d27c3--iridescent-liger-9cef67.netlify.app";
 app.use(cors({ origin: allowedOrigin }));
 
 
-const io = new Server(http, {
+const io = new Server(http, { 
   cors: { origin: allowedOrigin, methods: ["GET", "POST"], credentials :true }
 });
 

@@ -21,14 +21,18 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); 
 
 
-const allowedOrigin = process.env.FRONTEND_URL || "https://realtime-react-chat-application.netlify.app";
+const allowedOrigin = "https://realtime-react-chat-application.netlify.app" || process.env.FRONTEND_URL ;
 app.use(cors({ origin: allowedOrigin }));
 
 
 const io = new Server(http, { 
-  cors: { origin: allowedOrigin, methods: ["GET", "POST"], credentials :true }
+  cors: { origin: allowedOrigin,  
+     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allowedHeaders: ["Content-Type", "Authorization"],
+     credentials :true }
 });
 
+app.options('*', cors());
 app.use('/api', api);
 
 connectDB();

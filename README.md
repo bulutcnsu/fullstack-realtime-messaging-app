@@ -1,10 +1,20 @@
 # Fullstack Realtime Chat Application
 
+👉 **[Live Demo](https://realtime-react-chat-application.netlify.app)**
+
 # 💬 chatApp - Full-Stack Real-Time Chat Platform
 
 A production-ready, secure, and feature-rich real-time chat application inspired by WhatsApp. Built with a robust **Node.js/Express.js (MVC)** backend and a modern **React/Material-UI** frontend.
 
----
+ ## 🚀 DEPLOYMENT
+
+The project is deployed using a decoupled architecture across the following cloud services:
+
+*   **Database (MongoDB Atlas):** The database is hosted in the cloud. Server access is established via a secured connection URI.
+
+*   **Backend & Socket.io ([Render](https://fullstack-realtime-messaging-app.onrender.com)):** The server layer runs as a `Web Service` on Render. Environment variables (`MONGODB_URI`, `JWT_SECRET`, `CLIENT_URL`) are managed through the dashboard.
+*   **Frontend ([Netlify](https://realtime-react-chat-application.netlify.app)):** The Create React App (CRA) client application is hosted on Netlify. The `REACT_APP_API_URL` environment variable is defined for the API connection, and a `_redirects` rule is added to handle SPA routing.
+
 
 ## ✨ Key Features
 

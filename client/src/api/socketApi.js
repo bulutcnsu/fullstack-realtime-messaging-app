@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 
 let socket = null;
 
-const URL = "https://realtime-chatapp-backend-ybmv.onrender.com";
+const URL = "https://realtime-react-chat-application.netlify.app";
 
 export const init = (token) => {
 

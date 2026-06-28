@@ -21,7 +21,7 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); 
 
 
-const allowedOrigin = process.env.FRONTEND_URL || "https://6a380e051b56a3dc661d27c3--iridescent-liger-9cef67.netlify.app";
+const allowedOrigin = process.env.FRONTEND_URL || "https://realtime-react-chat-application.netlify.app";
 app.use(cors({ origin: allowedOrigin }));
 
 

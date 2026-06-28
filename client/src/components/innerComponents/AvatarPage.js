@@ -15,7 +15,7 @@ return((
        <IconButton sx={{ p: 0, width: "10%" }}>
         <Avatar
           alt={username}
-          src="/images/user.png"
+          src={undefined} //"/images/user.png"
           sx={{
             color: "#5930caeb",
             bgcolor: "white",

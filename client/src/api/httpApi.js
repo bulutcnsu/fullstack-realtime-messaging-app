@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const URL ="https://realtime-react-chat-application.netlify.app";
+const URL ="https://fullstack-realtime-messaging-app.onrender.com";
 
 export const loadRooms = async (username, callback) => {
   const [publicRooms, privateRooms] = await Promise.all([

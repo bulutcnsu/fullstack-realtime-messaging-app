@@ -20,7 +20,7 @@ const AuthForm = ({ onAuthSuccess }) => { //onSelect ,getName,getToken
   const [message, setMessage] = useState("");
   const [color, setColor] = useState("");
  
-  const URL ="https://realtime-chatapp-backend-ybmv.onrender.com"; 
+  const URL ="https://fullstack-realtime-messaging-app.onrender.com"; 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -46,7 +46,7 @@ const AuthForm = ({ onAuthSuccess }) => { //onSelect ,getName,getToken
 
     if (name && password) {
 
-      const res = await fetch(URL, {
+      const res = await fetch(URL +"/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: name.trim(), password: password }),
@@ -76,7 +76,7 @@ const AuthForm = ({ onAuthSuccess }) => { //onSelect ,getName,getToken
 
   const handleLogin = async () => {
 
-    const res = await fetch(URL, {
+    const res = await fetch(URL +"/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: name.trim(), password: password }),

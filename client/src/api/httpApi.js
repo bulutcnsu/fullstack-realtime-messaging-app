@@ -27,7 +27,7 @@ export const loadMessages = async (username, callback) => {
 
 export const createNewRoom = async (room) => {
   try {
-    const res = await fetch(URL, {
+    const res = await fetch(URL+"/api/room/newGroup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(room),
@@ -61,7 +61,7 @@ const normalizeMessages = (messagesFromHttp, targetArray) => {
 
 const fetchPublicMessages = async (username) => {
   try {
-    const url = URL + username;
+    const url = URL +"/api/messages/public/" + username;
     const res = await axios.get(url);
 
     return res.data.messages;
@@ -73,7 +73,7 @@ const fetchPublicMessages = async (username) => {
 
 const fetchPrivateMessages = async (username) => {
   try {
-    const url = URL + username;
+    const url = URL +"/api/messages/private/"+ username;
     const res = await axios.get(url);
     return res.data.messages;
   } catch (err) {
@@ -83,7 +83,7 @@ const fetchPrivateMessages = async (username) => {
 };
 const fetchPrivateRooms = async (username) => {
   try {
-    const url = URL + username;
+    const url = URL+"/api/room/privateRooms/"+ username;
     const res = await axios.get(url);
     return res.data.rooms;
   } catch (err) {
@@ -94,7 +94,7 @@ const fetchPrivateRooms = async (username) => {
 
 const fetchPublicRooms = async (username) => {
   try {
-    const url = URL + username;
+    const url = URL+ "/api/room/publicRooms/" + username;
     const res = await axios.get(url);
 
     return res.data.rooms;
@@ -106,7 +106,7 @@ const fetchPublicRooms = async (username) => {
 
 export const fetchAllUsers = async () => {
   try {
-    const url = URL;
+    const url = URL + "/api/user/allusers/";
     const res = await axios.get(url);
 
     return res.data.list;
@@ -121,7 +121,7 @@ export const deleteItemList = async (itemType, list) => {
   const url = list[0].roomId ? "messages/deleteMessage" : "room/deleteRoom"
 
   try {
-    const res = await fetch(URL + url, {
+    const res = await fetch(URL +"/api/" + url, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -142,7 +142,7 @@ export const deleteItemList = async (itemType, list) => {
 
 export const updatePrivateGroup = async (list, room, username) => { //update Private Group Room List
   try {
-    const res = await fetch(URL, {
+    const res = await fetch(URL + "/api/room/updatePrivateGroup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ list: list, room: room, username: username })
@@ -170,7 +170,7 @@ export const updatePrivateGroup = async (list, room, username) => { //update Pri
 export const updatePublicRoom = async (roomId, username) => {//updatePublic Room
   try {
     const res = await axios.patch(
-      URL + roomId,
+      URL + "/api/room/publicRooms/subscribe/" + roomId,
       { username: username }
     );
 

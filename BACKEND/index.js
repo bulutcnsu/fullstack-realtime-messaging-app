@@ -29,7 +29,10 @@ const io = new Server(http, {
   cors: { origin: allowedOrigin,  
      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
      allowedHeaders: ["Content-Type", "Authorization"],
-     credentials :true }
+     transports: ["polling", "websocket"], // Sıralamayı polling ile başlatmak Render Free'de bazen daha stabildir
+     upgrade: true,
+     reconnectionAttempts: 5, // Bağlantı koparsa 5 kez tekrar dene
+     reconnectionDelay: 2000 }
 });
 
 app.options('*', cors());

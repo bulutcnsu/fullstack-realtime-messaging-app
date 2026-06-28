@@ -226,32 +226,36 @@ export const handleUpdatedRooms = (prev, data, current, status) => {
   let arr = updated[room.type] || [];
   const oldRoom = arr.find(r => r._id === room._id);
 
-
   if (status === "MESSAGE") {
-
     if (current?._id !== room._id && (room.joined || room.type === 'private')) {
       room.unreadCount = (oldRoom?.unreadCount || 0) + 1;
     } else {
       room.unreadCount = 0;
     }
 
-    const filteredArr = arr.filter((r) => r._id !== room._id);
+   
+    let filteredArr;
+    if (tempRoomId) {
+      filteredArr = arr.filter((r) => r._id !== room._id && r._id !== tempRoomId);
+    } else {
+      filteredArr = arr.filter((r) => r._id !== room._id && !r._id.startsWith('temp-')); 
+   
+    }
+    
     let newArr = [room, ...filteredArr];
-
     return { ...updated, [room.type]: newArr };
   }
-
 
   if (status === "PUBLIC_GROUP_UPDATE") {
     room.unreadCount = oldRoom?.unreadCount || 0;
 
-    const filtered = arr.filter((r) => r._id !== room._id);
+    // Burada da temp odaları temizleme koruması ekleyelim
+    const filtered = arr.filter((r) => r._id !== room._id && r._id !== tempRoomId && !r._id.startsWith('temp-'));
     let newArr = [...filtered, room];
     newArr.sort((a, b) => b.joined - a.joined);
 
     return { ...updated, [room.type]: newArr };
   }
-
 
   if (tempRoomId) {
     const hasTempRoom = arr.some(r => r._id === tempRoomId);
@@ -277,11 +281,13 @@ export const handleUpdatedRooms = (prev, data, current, status) => {
       return { ...updated, [room.type]: newArr };
     }
   } else {
-    let filteredArr = arr.filter((r) => r._id !== room._id);
+   
+    let filteredArr = arr.filter((r) => r._id !== room._id && r._id !== tempRoomId && !r._id.startsWith('temp-'));
     let newArr = [room, ...filteredArr];
     return { ...updated, [room.type]: newArr };
   }
 };
+
 
 export const handlePublicGroupUpdated = (prev, room) => {
 
